@@ -1,16 +1,18 @@
 package peripherals;
 /*
- * Code adapted from from https://best-programming-tricks.blogspot.com/2011/07/how-to-make-login-form-with-java-gui.html
+ * Code adapted from https://best-programming-tricks.blogspot.com/2011/07/how-to-make-login-form-with-java-gui.html
  */
 
 import javax.swing.*;
 import java.awt.event.*;
+import java.io.Serial;
 
 public class LoginGUI extends JFrame {
 
     /**
      *
      */
+    @Serial
     private static final long serialVersionUID = -6921462126880570161L;
 
     public static void main(String[] args) {
@@ -25,7 +27,7 @@ public class LoginGUI extends JFrame {
     LoginData ldata = new LoginData();
 
     LoginGUI() {
-        super("Login Autentification");
+        super("Login Authentication");
         setSize(300, 200);
         setLocation(500, 280);
         panel.setLayout(null);

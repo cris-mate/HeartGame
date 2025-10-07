@@ -38,7 +38,7 @@ public class GameServer {
             return result.toString("UTF-8");
         } catch (Exception e) {
             /* To do: proper exception handling when URL cannot be read. */
-            System.out.println("An Error occured: " + e.toString());
+            System.out.println("An error occurred: " + e.toString());
             e.printStackTrace();
             return null;
         }

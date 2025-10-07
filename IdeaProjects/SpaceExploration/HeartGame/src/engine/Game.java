@@ -38,9 +38,5 @@ public class Game {
         return solution;
     }
 
-
-
-
-
 }
 

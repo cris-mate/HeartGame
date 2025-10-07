@@ -3,6 +3,7 @@ package peripherals;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 import javax.swing.*;
 
@@ -13,6 +14,7 @@ import engine.GameEngine;
  */
 public class GameGUI extends JFrame implements ActionListener {
 
+    @Serial
     private static final long serialVersionUID = -107785653906635L;
 
 
