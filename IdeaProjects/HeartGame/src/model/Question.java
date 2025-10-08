@@ -6,7 +6,6 @@ import java.awt.image.BufferedImage;
  * Represents a single question in the game, containing the visual representation
  * (image) and the correct answer (solution)
  */
-
 public class Question {
 
     private final BufferedImage image;
@@ -23,18 +22,17 @@ public class Question {
     }
 
     /**
-     * @return the image of the game.
+     * @return the image of the game
      */
     public BufferedImage getImage() {
         return image;
     }
 
     /**
-     * @return the solution of the game.
+     * @return the solution of the game
      */
     public int getSolution() {
         return solution;
     }
-
 }
 

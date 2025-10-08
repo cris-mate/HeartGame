@@ -13,10 +13,15 @@ import java.net.URL;
 import java.util.Base64;
 
 /**
- * Handles communication with the external game API to fetch questions.
+ * Handles communication with the external game API to fetch questions
  */
 public class GameAPIService {
 
+    /**
+     * Reads the content from a given URL and returns it as a String
+     * @param urlString The URL to read from
+     * @return The content of the URL as a String, or null if an error occurs
+     */
     private static String readUrl(String urlString)  {
         try {
             URL url = new URI(urlString).toURL();
@@ -33,7 +38,7 @@ public class GameAPIService {
             }
             return result.toString("UTF-8");
         } catch (Exception e) {
-            /* To do: proper exception handling when URL cannot be read. */
+            /* TODO: proper exception handling when URL cannot be read. */
             System.out.println("An error occurred: " + e.toString());
             e.printStackTrace();
             return null;
@@ -48,9 +53,9 @@ public class GameAPIService {
         // See http://marconrad.com/uob/tomato for details of usage of the api.
 
         String tomatoAPI = "https://marcconrad.com/uob/heart/api.php?out=csv&base64=yes";
-        String dataraw = readUrl(tomatoAPI);
-        if (dataraw != null) {
-            String[] data = dataraw.split(",");
+        String dataRaw = readUrl(tomatoAPI);
+        if (dataRaw != null) {
+            String[] data = dataRaw.split(",");
             byte[] decodeImg = Base64.getDecoder().decode(data[0]);
             ByteArrayInputStream quest = new ByteArrayInputStream(decodeImg);
             int solution = Integer.parseInt(data[1]);

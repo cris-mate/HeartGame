@@ -6,10 +6,9 @@ import service.ScoringService;
 import view.GameGUI;
 
 import java.awt.event.ActionEvent;
-import java.awt.image.BufferedImage;
 
 /**
- * Controller for handling the main game logic.
+ * Controller for handling the main game logic
  */
 public class GameController {
 
@@ -19,9 +18,8 @@ public class GameController {
     private Question currentQuestion;
 
     /**
-     * Constructs a new GameController.
-     *
-     * @param gameView The game view it controls.
+     * Constructs a new GameController
+     * @param gameView The game view it controls
      */
     public GameController(GameGUI gameView) {
         this.gameView = gameView;
@@ -31,12 +29,19 @@ public class GameController {
         loadNextGame();
     }
 
+    /**
+     * Initializes the controller by attaching action listeners to the view's buttons
+     */
     private void initController() {
         for (int i = 0; i < 10; i++) {
             gameView.getButton(i).addActionListener(this::handleAnswer);
         }
     }
 
+    /**
+     * Loads the next game question from the API service and updates the view
+     * If a question cannot be loaded, it displays an error message
+     */
     public void loadNextGame() {
         currentQuestion = apiService.getRandomGame();
         if (currentQuestion != null) {
@@ -46,7 +51,11 @@ public class GameController {
         }
     }
 
-
+    /**
+     * Handles the user's answer submission. It checks if the answer is correct,
+     * updates the score, provides feedback to the user, and loads the next question
+     * @param e The ActionEvent triggered by the user's button click
+     */
     public void handleAnswer( ActionEvent e ) {
         int solution = Integer.parseInt(e.getActionCommand());
         if (solution == currentQuestion.getSolution()) {
@@ -57,5 +66,4 @@ public class GameController {
             gameView.updateInfo("Oops. Try again! Score: " + scoringService.getScore());
         }
     }
-
 }

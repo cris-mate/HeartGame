@@ -22,7 +22,7 @@ public class GameState {
     public int getScore() { return score; }
 
     /**
-     * Sets the current score.
+     * Sets the current score
      * @param score the new score
      */
     public void setScore(int score) { this.score = score; }
