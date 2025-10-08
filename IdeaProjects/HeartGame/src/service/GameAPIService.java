@@ -2,6 +2,7 @@ package service;
 
 import model.Question;
 
+import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -11,17 +12,10 @@ import java.net.URI;
 import java.net.URL;
 import java.util.Base64;
 
-import javax.imageio.ImageIO;
-
 /**
- * Game that interfaces to an external Server to retrieve a game.
- * A game consists of an image and an integer that denotes the solution of this game.
+ * Handles communication with the external game API to fetch questions.
  */
 public class GameAPIService {
-
-    /**
-     * Basic utility method to read string for URL.
-     */
 
     private static String readUrl(String urlString)  {
         try {
@@ -44,35 +38,29 @@ public class GameAPIService {
             e.printStackTrace();
             return null;
         }
-
     }
 
     /**
-     * Retrieves a random game from the web site.
-     * @return a random game or null if a game cannot be found.
+     * Fetches a random game question from the API
+     * @return A new Question object or null if an error occurs
      */
     public Question getRandomGame() {
         // See http://marconrad.com/uob/tomato for details of usage of the api.
 
-        String tomatoapi = "https://marcconrad.com/uob/heart/api.php?out=csv&base64=yes";
-        String dataraw = readUrl(tomatoapi);
-        String[] data = dataraw.split(",");
-
-        byte[] decodeImg = Base64.getDecoder().decode(data[0]);
-        ByteArrayInputStream quest = new ByteArrayInputStream(decodeImg);
-
-        int solution = Integer.parseInt(data[1]);
-
-        BufferedImage img = null;
-        try {
-            img = ImageIO.read(quest);
-            return new Question(img, solution);
-        } catch (IOException e1) {
-            // TODO Add proper exception handling.
-            e1.printStackTrace();
-            return null;
+        String tomatoAPI = "https://marcconrad.com/uob/heart/api.php?out=csv&base64=yes";
+        String dataraw = readUrl(tomatoAPI);
+        if (dataraw != null) {
+            String[] data = dataraw.split(",");
+            byte[] decodeImg = Base64.getDecoder().decode(data[0]);
+            ByteArrayInputStream quest = new ByteArrayInputStream(decodeImg);
+            int solution = Integer.parseInt(data[1]);
+            try {
+                BufferedImage img = ImageIO.read(quest);
+                return new Question(img, solution);
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
         }
+        return null;
     }
-
 }
-
