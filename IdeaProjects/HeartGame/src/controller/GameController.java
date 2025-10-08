@@ -2,64 +2,60 @@ package controller;
 
 import model.Question;
 import service.GameAPIService;
+import service.ScoringService;
+import view.GameGUI;
 
+import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
 
 /**
- * Main class where the games are coming from.
- *
+ * Controller for handling the main game logic.
  */
 public class GameController {
-    String thePlayer = null;
+
+    private final GameGUI gameView;
+    private final GameAPIService apiService;
+    private final ScoringService scoringService;
+    private Question currentQuestion;
 
     /**
-     * Each player has their own game engine.
+     * Constructs a new GameController.
      *
-     * @param player
+     * @param gameView The game view it controls.
      */
-    public GameController(String player) {
-        thePlayer = player;
+    public GameController(GameGUI gameView) {
+        this.gameView = gameView;
+        this.apiService = new GameAPIService();
+        this.scoringService = new ScoringService();
+        initController();
+        loadNextGame();
     }
 
-    int counter = 0;
-    int score = 0;
-    GameAPIService theGames = new GameAPIService();
-    Question current = null;
-
-    /**
-     * Retrieves a game. This basic version only has two games that alternate.
-     */
-    public BufferedImage nextGame() {
-        current = theGames.getRandomGame();
-        return current.getImage();
-
-    }
-
-    /**
-     * Checks if the parameter i is a solution to the game URL. If so, score is
-     * increased by one.
-     *
-     * @param game
-     * @param i
-     * @return
-     */
-    public boolean checkSolution( int i) {
-        if (i == current.getSolution()) {
-            score++;
-            return true;
-        } else {
-            return false;
+    private void initController() {
+        for (int i = 0; i < 10; i++) {
+            gameView.getButton(i).addActionListener(this::handleAnswer);
         }
     }
 
-    /**
-     * Retrieves the score.
-     *
-     * @param player
-     * @return
-     */
-    public int getScore() {
-        return score;
+    public void loadNextGame() {
+        currentQuestion = apiService.getRandomGame();
+        if (currentQuestion != null) {
+            gameView.updateQuestion(currentQuestion.getImage(), scoringService.getScore());
+        } else {
+            gameView.showError("Failed to load the next game.");
+        }
+    }
+
+
+    public void handleAnswer( ActionEvent e ) {
+        int solution = Integer.parseInt(e.getActionCommand());
+        if (solution == currentQuestion.getSolution()) {
+            scoringService.increaseScore();
+            gameView.updateInfo("Good! Score: " + scoringService.getScore());
+            loadNextGame();
+        } else {
+            gameView.updateInfo("Oops. Try again! Score: " + scoringService.getScore());
+        }
     }
 
 }
