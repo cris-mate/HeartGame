@@ -6,66 +6,55 @@ package view;
 import controller.LoginController;
 
 import javax.swing.*;
-import java.awt.event.*;
 import java.io.Serial;
 
+/**
+ * The view for the login screen.
+ */
 public class LoginGUI extends JFrame {
 
-    /**
-     *
-     */
     @Serial
     private static final long serialVersionUID = -6921462126880570161L;
 
-    public static void main(String[] args) {
-        new LoginGUI();
-    }
-
-    JButton blogin = new JButton("Login");
-    JPanel panel = new JPanel();
-    JTextField txuser = new JTextField(15);
-    JPasswordField pass = new JPasswordField(15);
-
-    LoginController ldata = new LoginController();
+    private final JButton loginButton = new JButton("Login");
+    private final JTextField userField = new JTextField(15);
+    private final JPasswordField passwordField = new JPasswordField(15);
 
     LoginGUI() {
         super("Login Authentication");
         setSize(300, 200);
         setLocation(500, 280);
+        JPanel panel = new JPanel();
         panel.setLayout(null);
 
-        txuser.setBounds(70, 30, 150, 20);
-        pass.setBounds(70, 65, 150, 20);
-        blogin.setBounds(110, 100, 80, 20);
+        userField.setBounds(70, 30, 150, 20);
+        passwordField.setBounds(70, 65, 150, 20);
+        loginButton.setBounds(110, 100, 80, 20);
 
-        panel.add(blogin);
-        panel.add(txuser);
-        panel.add(pass);
+        panel.add(loginButton);
+        panel.add(userField);
+        panel.add(passwordField);
 
         getContentPane().add(panel);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setVisible(true);
-        actionlogin();
+
+        new LoginController(this);
     }
 
-    public void actionlogin() {
-        blogin.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent ae) {
-                String puname = txuser.getText();
-                String ppaswd = String.valueOf(pass.getPassword()); // https://stackoverflow.com/questions/10443308/why-gettext-in-jpasswordfield-was-deprecated
-                if( ldata.checkPassword(puname, ppaswd)) {
-                    GameGUI theGame = new GameGUI(puname);
-                    theGame.setVisible(true);
-                    dispose();
-                } else {
+    public String getUsername() { return userField.getText(); }
 
-                    JOptionPane.showMessageDialog(null, "Wrong Password / Username");
-                    txuser.setText("");
-                    pass.setText("");
-                    txuser.requestFocus();
-                }
+    public String getPassword() { return String.valueOf(passwordField.getPassword()); }
 
-            }
-        });
+    public JButton getLoginButton() { return loginButton; }
+
+    public void clearFields() {
+        userField.setText("");
+        passwordField.setText("");
+        userField.requestFocus();
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(LoginGUI::new);
     }
 }
