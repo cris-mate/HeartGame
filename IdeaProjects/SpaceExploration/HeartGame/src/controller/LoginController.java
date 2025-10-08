@@ -1,4 +1,4 @@
-package peripherals;
+package controller;
 /**
  * Basic class. To do:
  * link against external database.
@@ -6,7 +6,7 @@ package peripherals;
  * Encryption
  * Etc.
  */
-public class LoginData {
+public class LoginController {
     /**
      * Returns true if passwd matches the username given.
      * @param username

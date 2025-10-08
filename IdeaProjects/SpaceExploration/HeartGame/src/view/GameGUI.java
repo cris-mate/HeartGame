@@ -1,4 +1,4 @@
-package peripherals;
+package view;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -7,7 +7,7 @@ import java.io.Serial;
 
 import javax.swing.*;
 
-import engine.GameEngine;
+import controller.GameController;
 
 /**
  * A Simple Graphical User Interface for the Six Equation Game.
@@ -39,7 +39,7 @@ public class GameGUI extends JFrame implements ActionListener {
     }
 
     JLabel questArea = null;
-    GameEngine myGame = null;
+    GameController myGame = null;
     BufferedImage currentGame = null;
     JTextArea infoArea = null;
     /**
@@ -52,7 +52,7 @@ public class GameGUI extends JFrame implements ActionListener {
         setTitle("What is the missing value?");
         JPanel panel = new JPanel();
 
-        myGame = new GameEngine(player);
+        myGame = new GameController(player);
         currentGame = myGame.nextGame();
 
         infoArea = new JTextArea(1, 40);

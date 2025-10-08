@@ -1,7 +1,9 @@
-package peripherals;
+package view;
 /*
  * Code adapted from https://best-programming-tricks.blogspot.com/2011/07/how-to-make-login-form-with-java-gui.html
  */
+
+import controller.LoginController;
 
 import javax.swing.*;
 import java.awt.event.*;
@@ -24,7 +26,7 @@ public class LoginGUI extends JFrame {
     JTextField txuser = new JTextField(15);
     JPasswordField pass = new JPasswordField(15);
 
-    LoginData ldata = new LoginData();
+    LoginController ldata = new LoginController();
 
     LoginGUI() {
         super("Login Authentication");

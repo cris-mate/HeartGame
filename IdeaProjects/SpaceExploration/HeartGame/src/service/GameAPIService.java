@@ -1,4 +1,6 @@
-package engine;
+package service;
+
+import model.Question;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
@@ -15,7 +17,7 @@ import javax.imageio.ImageIO;
  * Game that interfaces to an external Server to retrieve a game.
  * A game consists of an image and an integer that denotes the solution of this game.
  */
-public class GameServer {
+public class GameAPIService {
 
     /**
      * Basic utility method to read string for URL.
@@ -49,7 +51,7 @@ public class GameServer {
      * Retrieves a random game from the web site.
      * @return a random game or null if a game cannot be found.
      */
-    public Game getRandomGame() {
+    public Question getRandomGame() {
         // See http://marconrad.com/uob/tomato for details of usage of the api.
 
         String tomatoapi = "https://marcconrad.com/uob/heart/api.php?out=csv&base64=yes";
@@ -64,7 +66,7 @@ public class GameServer {
         BufferedImage img = null;
         try {
             img = ImageIO.read(quest);
-            return new Game(img, solution);
+            return new Question(img, solution);
         } catch (IOException e1) {
             // TODO Add proper exception handling.
             e1.printStackTrace();
