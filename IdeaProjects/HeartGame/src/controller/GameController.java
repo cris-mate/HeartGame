@@ -6,11 +6,15 @@ import service.ScoringService;
 import view.GameGUI;
 
 import java.awt.event.ActionEvent;
+import java.io.IOException;
+import java.util.logging.Logger;
 
 /**
  * Controller for handling the main game logic
  */
 public class GameController {
+
+    private static final Logger logger = Logger.getLogger(GameController.class.getName());
 
     private final GameGUI gameView;
     private final GameAPIService apiService;
@@ -30,7 +34,7 @@ public class GameController {
     }
 
     /**
-     * Initializes the controller by attaching action listeners to the view's buttons
+     * Initialises the controller by attaching action listeners to the view's buttons
      */
     private void initController() {
         for (int i = 0; i < 10; i++) {
@@ -43,11 +47,16 @@ public class GameController {
      * If a question cannot be loaded, it displays an error message
      */
     public void loadNextGame() {
-        currentQuestion = apiService.getRandomGame();
-        if (currentQuestion != null) {
-            gameView.updateQuestion(currentQuestion.getImage(), scoringService.getScore());
-        } else {
-            gameView.showError("Failed to load the next game.");
+        try {
+            currentQuestion = apiService.getNewQuestion();
+            if (currentQuestion != null) {
+                gameView.updateQuestion(currentQuestion.getImage(), scoringService.getScore());
+            } else {
+                gameView.showError("Failed to load a valid game question.");
+            }
+        } catch (IOException e) {
+            logger.severe("Failed to fetch a new question from the API." + e.getMessage());
+            gameView.showError("Could not fetch a new game. Please check your connection.");
         }
     }
 
