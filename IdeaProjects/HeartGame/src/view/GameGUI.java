@@ -10,7 +10,8 @@ import java.awt.image.BufferedImage;
 import java.io.Serial;
 
 /**
- * The main view for the game screen.
+ * The main view for the game screen
+ * Reacts to events to update the UI
  */
 public class GameGUI extends JFrame implements GameEventListener {
 
@@ -53,6 +54,12 @@ public class GameGUI extends JFrame implements GameEventListener {
         new GameController(this);
     }
 
+    /**
+     * Handles game events to provide visual feedback to the user
+     * Updates the info text based on whether a correct or incorrect answer was submitted
+     * @param eventType The type of event that occurred
+     * @param data      The current score, passed as an Integer
+     */
     @Override
     public void onGameEvent(GameEventType eventType, Object data) {
         int currentScore = (int) data;

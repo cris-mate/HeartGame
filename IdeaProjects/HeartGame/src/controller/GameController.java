@@ -25,6 +25,8 @@ public class GameController {
 
     /**
      * Constructs a new GameController
+     * It initializes the services,links the controller to the view,
+     * loads the first question and publishes the GAME_STARTED event.
      * @param gameView The game view it controls
      */
     public GameController(GameGUI gameView) {
@@ -64,8 +66,9 @@ public class GameController {
     }
 
     /**
-     * Handles the user's answer submission. It checks if the answer is correct,
-     * updates the score, provides feedback to the user, and loads the next question
+     * Handles the user's answer submission
+     * t checks the solution and publishes either a CORRECT_ANSWER_SUBMITTED or
+     * INCORRECT_ANSWER_SUBMITTED event with the relevant score data
      * @param e The ActionEvent triggered by the user's button click
      */
     public void handleAnswer( ActionEvent e ) {

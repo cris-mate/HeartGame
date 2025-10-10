@@ -16,6 +16,12 @@ public class ScoringService implements GameEventListener {
         GameEventManager.getInstance().subscribe(GameEventType.CORRECT_ANSWER_SUBMITTED, this);
     }
 
+    /**
+     * Handles game events to update the score
+     * Increments the score when a CORRECT_ANSWER_SUBMITTED event is received
+     * @param eventType The type of event that occurred
+     * @param data      Optional data associated with the event
+     */
     @Override
     public void onGameEvent(GameEventType eventType, Object data) {
         if (eventType == GameEventType.CORRECT_ANSWER_SUBMITTED) {

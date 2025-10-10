@@ -41,8 +41,9 @@ public class LoginController {
     }
 
     /**
-     * Performs the login action. It retrieves user credentials from the view,
-     * validates them, and either proceeds to the main game or shows an error message
+     * Performs the login action validating user credentials:
+     * On success, publishes a PLAYER_LOGGED_IN event before transitioning to the main game view.
+     * On failure, it displays an error message.
      */
     private void performLogin() {
         String username = loginView.getUsername();
