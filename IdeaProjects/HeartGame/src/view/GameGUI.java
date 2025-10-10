@@ -1,6 +1,9 @@
 package view;
 
 import controller.GameController;
+import event.GameEventType;
+import event.GameEventListener;
+import event.GameEventManager;
 
 import javax.swing.*;
 import java.awt.image.BufferedImage;
@@ -9,7 +12,7 @@ import java.io.Serial;
 /**
  * The main view for the game screen.
  */
-public class GameGUI extends JFrame {
+public class GameGUI extends JFrame implements GameEventListener {
 
     @Serial
     private static final long serialVersionUID = -107785653906635L;
@@ -43,7 +46,21 @@ public class GameGUI extends JFrame {
         }
 
         getContentPane().add(panel);
+
+        GameEventManager.getInstance().subscribe(GameEventType.CORRECT_ANSWER_SUBMITTED, this);
+        GameEventManager.getInstance().subscribe(GameEventType.INCORRECT_ANSWER_SUBMITTED, this);
+
         new GameController(this);
+    }
+
+    @Override
+    public void onGameEvent(GameEventType eventType, Object data) {
+        int currentScore = (int) data;
+        if (eventType == GameEventType.CORRECT_ANSWER_SUBMITTED) {
+            updateInfo("Good! Score: " + currentScore);
+        } else if (eventType == GameEventType.INCORRECT_ANSWER_SUBMITTED) {
+            updateInfo("Oops. Try again! Score: " + currentScore);
+        }
     }
 
     /**

@@ -1,15 +1,27 @@
 package service;
 
+import event.GameEventType;
+import event.GameEventListener;
+import event.GameEventManager;
+
 /**
- * Manages the player's score
+ * Manages the player's score by listening to game events
  */
-public class ScoringService {
+public class ScoringService implements GameEventListener {
+
     private int score = 0;
 
-    /**
-     * Increases the score by one
-     */
-    public void increaseScore() { score++; }
+    public ScoringService() {
+        // Subscribe to the event that affects the score
+        GameEventManager.getInstance().subscribe(GameEventType.CORRECT_ANSWER_SUBMITTED, this);
+    }
+
+    @Override
+    public void onGameEvent(GameEventType eventType, Object data) {
+        if (eventType == GameEventType.CORRECT_ANSWER_SUBMITTED) {
+            score++;
+        }
+    }
 
     /**
      * @return The current score

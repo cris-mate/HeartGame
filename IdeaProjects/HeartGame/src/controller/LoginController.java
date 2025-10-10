@@ -3,6 +3,8 @@ package controller;
 import model.User;
 import view.GameGUI;
 import view.LoginGUI;
+import event.GameEventType;
+import event.GameEventManager;
 
 import javax.swing.*;
 
@@ -16,6 +18,7 @@ import javax.swing.*;
 
 /**
  * Controller for handling login logic
+ * Publishes an event on successful login
  */
 public class LoginController {
 
@@ -47,6 +50,7 @@ public class LoginController {
 
         if (checkPassword(username, password)) {
             User user = new User(username);
+            GameEventManager.getInstance().publish(GameEventType.PLAYER_LOGGED_IN, user);
             loginView.dispose();
             // In a real application, you would pass the user object to the GameGUI
             SwingUtilities.invokeLater(() -> new GameGUI().setVisible(true));
