@@ -1,7 +1,7 @@
 package controller;
 
 import model.Question;
-import service.GameAPIService;
+import service.HeartGameAPIService;
 import service.ScoringService;
 import view.GameGUI;
 import event.GameEventType;
@@ -19,7 +19,7 @@ public class GameController {
 
     private static final Logger logger = Logger.getLogger(GameController.class.getName());
     private final GameGUI gameView;
-    private final GameAPIService apiService;
+    private final HeartGameAPIService apiService;
     private final ScoringService scoringService;
     private Question currentQuestion;
 
@@ -31,7 +31,7 @@ public class GameController {
      */
     public GameController(GameGUI gameView) {
         this.gameView = gameView;
-        this.apiService = new GameAPIService();
+        this.apiService = new HeartGameAPIService();
         this.scoringService = new ScoringService();
         initController();
         loadNextGame();

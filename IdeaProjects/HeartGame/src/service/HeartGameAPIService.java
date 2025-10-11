@@ -14,11 +14,16 @@ import java.util.Base64;
 import java.util.logging.Logger;
 
 /**
- * Handles communication with the external game API to fetch questions
+ * Handles communication with the external Heart Game API to fetch questions
  */
-public class GameAPIService {
+public class HeartGameAPIService implements APIService {
 
-    private static final Logger logger = Logger.getLogger(GameAPIService.class.getName());
+    private static final Logger logger = Logger.getLogger(HeartGameAPIService.class.getName());
+
+    @Override
+    public String fetchData(String endpoint) throws IOException {
+        return readUrl(endpoint);
+    }
 
     /**
      * Reads the content from a given URL and returns it as a String
@@ -43,24 +48,23 @@ public class GameAPIService {
     }
 
     /**
-     * Fetches a random game question from the API
+     * Fetches a random game question from the Heart game API
      * @return A new Question object or null if an error occurs
+     * @throws IOException if fetching or parsing the game data fails
      */
     public Question getNewQuestion() throws IOException {
 
         String heartAPI = "https://marcconrad.com/uob/heart/api.php?out=csv&base64=yes";
-        String dataRaw;
-        String[] data;
         BufferedImage image;
         int solution;
 
         try {
-            dataRaw = readUrl(heartAPI);
+            String dataRaw = fetchData(heartAPI);
             if (dataRaw == null || dataRaw.isBlank()) {
                 throw new IOException("Empty or null API response");
             }
 
-            data = dataRaw.split(",");
+            String[] data = dataRaw.split(",");
             if (data.length < 2) {
                 throw new IOException("Unexpected API response format");
             }

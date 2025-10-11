@@ -11,7 +11,7 @@ import java.io.Serial;
 
 /**
  * The main view for the game screen
- * Reacts to events to update the UI
+ * Reacts to events updating the UI
  */
 public class GameGUI extends JFrame implements GameEventListener {
 
