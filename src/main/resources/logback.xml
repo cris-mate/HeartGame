@@ -1,0 +1,15 @@
+<configuration>
+
+    <appender name="DB" class="ch.qos.logback.classic.db.DBAppender">
+        <connectionSource class="ch.qos.logback.core.db.DriverManagerConnectionSource">
+            <url>jdbc:mysql://localhost:3306/heartgame</url>
+            <user>your_username</user>
+            <password>your_password</password>
+        </connectionSource>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="DB" />
+    </root>
+
+</configuration>
