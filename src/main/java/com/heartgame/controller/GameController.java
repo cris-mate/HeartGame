@@ -10,7 +10,8 @@ import com.heartgame.event.GameEventManager;
 
 import java.awt.event.ActionEvent;
 import java.io.IOException;
-import java.util.logging.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Controller for handling the main game logic
@@ -18,10 +19,11 @@ import java.util.logging.*;
  */
 public class GameController {
 
-    private static final Logger logger = Logger.getLogger(GameController.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(GameController.class);
     private final GameGUI gameView;
     private final HeartGameAPIService apiService;
     private final ScoringService scoringService;
+    private final User user;
     private Question currentQuestion;
 
     /**
@@ -29,9 +31,11 @@ public class GameController {
      * It initializes the services,links the controller to the view,
      * loads the first question and publishes the GAME_STARTED event.
      * @param gameView The game view it controls
+     * @param user     The logged-in user
      */
     public GameController(GameGUI gameView, User user) {
         this.gameView = gameView;
+        this.user = user;
         this.apiService = new HeartGameAPIService();
         this.scoringService = new ScoringService();
         initController();
@@ -62,25 +66,25 @@ public class GameController {
                 gameView.showError("Failed to load a valid game question.");
             }
         } catch (IOException e) {
-            logger.severe("Failed to fetch a new question from the API." + e.getMessage());
+            logger.error("Failed to fetch a new question from the API: '{}'", e.getMessage());
             gameView.showError("Could not fetch a new game. Please check your connection.");
         }
     }
 
     /**
      * Handles the user's answer submission
-     * t checks the solution and publishes either a CORRECT_ANSWER_SUBMITTED or
-     * INCORRECT_ANSWER_SUBMITTED event with the relevant score data
+     * It checks the solution and publishes either a CORRECT_ANSWER_SUBMITTED
+     * or INCORRECT_ANSWER_SUBMITTED event with the relevant score data
      * @param e The ActionEvent triggered by the user's button click
      */
     public void handleAnswer( ActionEvent e ) {
         int solution = Integer.parseInt(e.getActionCommand());
         if (solution == currentQuestion.getSolution()) {
-            logger.debug("Correct answer submitted for question.");
+            logger.debug("Correct answer submitted for question by user '{}'.", user.getUsername());
             GameEventManager.getInstance().publish(GameEventType.CORRECT_ANSWER_SUBMITTED, scoringService.getScore() + 1);
             loadNextGame();
         } else {
-            logger.debug("Incorrect answer submitted for question.");
+            logger.debug("Incorrect answer submitted for question  by user '{}'.", user.getUsername());
             GameEventManager.getInstance().publish(GameEventType.INCORRECT_ANSWER_SUBMITTED, scoringService.getScore());
         }
     }

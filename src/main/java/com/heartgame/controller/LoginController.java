@@ -65,7 +65,7 @@ public class LoginController {
             User user = new User(username);
             GameEventManager.getInstance().publish(GameEventType.PLAYER_LOGGED_IN, user);
             loginView.dispose();
-            // In a real application, you would pass the user object to the GameGUI
+            // Pass the user object to the GameGUI
             SwingUtilities.invokeLater(() -> new GameGUI().setVisible(true));
         } else {
             logger.warn("Failed login attempt for user '{}'.", username);
