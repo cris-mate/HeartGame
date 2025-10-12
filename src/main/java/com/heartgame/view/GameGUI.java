@@ -1,6 +1,7 @@
 package com.heartgame.view;
 
 import com.heartgame.controller.GameController;
+import com.heartgame.model.User;
 import com.heartgame.event.GameEventType;
 import com.heartgame.event.GameEventListener;
 import com.heartgame.event.GameEventManager;
@@ -25,9 +26,10 @@ public class GameGUI extends JFrame implements GameEventListener {
     /**
      * Constructs the main game GUI, initializes all UI components,
      * and links this view to its controller
+     * @param user The logged-in user
      */
-    public GameGUI() {
-        super("What is the missing value?");
+    public GameGUI(User user) {
+        super("What is the missing value? - Playing as: " + user.getUsername());
         setSize(690, 500);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         JPanel panel = new JPanel();
@@ -51,7 +53,7 @@ public class GameGUI extends JFrame implements GameEventListener {
         GameEventManager.getInstance().subscribe(GameEventType.CORRECT_ANSWER_SUBMITTED, this);
         GameEventManager.getInstance().subscribe(GameEventType.INCORRECT_ANSWER_SUBMITTED, this);
 
-        new GameController(this);
+        new GameController(this, user);
     }
 
     /**
@@ -108,9 +110,13 @@ public class GameGUI extends JFrame implements GameEventListener {
 
     /**
      * Main entry point to launch the game GUI
+     * For testing purposes only - in production, use LoginGUI
      * @param args Command-line arguments (not used)
      */
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new GameGUI().setVisible(true));
+        SwingUtilities.invokeLater(() -> {
+            User testUser = new User("TestPlayer");
+            new GameGUI(testUser).setVisible(true);
+        });
     }
 }

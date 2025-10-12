@@ -21,7 +21,7 @@ public class LoginGUI extends JFrame {
      * Constructs the login GUI, initializes all UI components,
      * and links this view to its controller
      */
-    LoginGUI() {
+    public LoginGUI() {
         super("Login Authentication");
         setSize(300, 200);
         setLocation(500, 280);

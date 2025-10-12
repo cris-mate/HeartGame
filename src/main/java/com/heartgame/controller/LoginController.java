@@ -66,7 +66,7 @@ public class LoginController {
             GameEventManager.getInstance().publish(GameEventType.PLAYER_LOGGED_IN, user);
             loginView.dispose();
             // Pass the user object to the GameGUI
-            SwingUtilities.invokeLater(() -> new GameGUI().setVisible(true));
+            SwingUtilities.invokeLater(() -> new GameGUI(user).setVisible(true));
         } else {
             logger.warn("Failed login attempt for user '{}'.", username);
             JOptionPane.showMessageDialog(loginView, "Wrong username or password! Please try again");
