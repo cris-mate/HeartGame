@@ -8,10 +8,8 @@ import com.heartgame.event.GameEventType;
 import com.heartgame.event.GameEventManager;
 
 import javax.swing.*;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
+import java.time.Instant;
 import org.mindrot.jbcrypt.BCrypt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,6 +60,7 @@ public class LoginController {
 
         if (checkPassword(username, password)) {
             logger.info("User '{}' successfully authenticated", username);
+            updateLastLogin(username);
             User user = new User(username);
             GameEventManager.getInstance().publish(GameEventType.PLAYER_LOGGED_IN, user);
             loginView.dispose();
@@ -71,6 +70,22 @@ public class LoginController {
             logger.warn("Failed login attempt for user '{}'.", username);
             JOptionPane.showMessageDialog(loginView, "Wrong username or password! Please try again");
             loginView.clearFields();
+        }
+    }
+
+    /**
+     * Updates the last_login timestamp for the given user to the current time
+     * @param username The username of the user to update
+     */
+    private void updateLastLogin(String username) {
+        String sql = "UPDATE users SET last_login = ? WHERE username = ?";
+        try (PreparedStatement stmt = dbConnection.prepareStatement(sql)) {
+            stmt.setTimestamp(1, Timestamp.from(Instant.now()));
+            stmt.setString(2, username);
+            stmt.executeUpdate();
+            logger.info("Updated last_login for user '{}'.", username);
+        } catch (SQLException e) {
+            logger.error("Failed to update last_login for user '{}'", username, e);
         }
     }
 
