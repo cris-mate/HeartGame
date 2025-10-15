@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS game_sessions (
 
 -- Game events log table (for the logback appender)
 CREATE TABLE IF NOT EXISTS logging_event (
-    timestmp BIGINT NOT NULL,
+    timestamp BIGINT NOT NULL,
     formatted_message TEXT NOT NULL,
     logger_name VARCHAR(254) NOT NULL,
     level_string VARCHAR(254) NOT NULL,
