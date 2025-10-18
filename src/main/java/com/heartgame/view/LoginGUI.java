@@ -1,9 +1,13 @@
 package com.heartgame.view;
 
 import com.heartgame.controller.LoginController;
+import com.heartgame.persistence.DatabaseManager;
+import com.heartgame.persistence.UserRepository;
+import com.heartgame.persistence.UserRepositoryImpl;
 
 import javax.swing.*;
 import java.io.Serial;
+import java.sql.Connection;
 
 /**
  * The view for the login screen
@@ -40,7 +44,10 @@ public class LoginGUI extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setVisible(true);
 
-        new LoginController(this);
+        // Initialize controller with repository
+        Connection connection = DatabaseManager.getInstance().getConnection();
+        UserRepository userRepository = new UserRepositoryImpl(connection);
+        new LoginController(this, userRepository);
     }
 
     /**
@@ -68,6 +75,14 @@ public class LoginGUI extends JFrame {
         userField.setText("");
         passwordField.setText("");
         userField.requestFocus();
+    }
+
+    /**
+     * Displays an error message to the user
+     * @param message The error message to display
+     */
+    public void showError(String message) {
+        JOptionPane.showMessageDialog(this, message, "Login Error", JOptionPane.ERROR_MESSAGE);
     }
 
     /**

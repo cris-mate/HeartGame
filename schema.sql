@@ -54,3 +54,14 @@ ON DUPLICATE KEY UPDATE username=username;
 INSERT INTO users (username, password_hash) VALUES
 ('demo', '$2a$10$xKx7KN7KvjJO3YYqXjjGG.f5JYDEyqJQrqVqP0Ry6U5YqJY2Y0N/2')
 ON DUPLICATE KEY UPDATE username=username;
+
+-- Support for Google OAuth
+ALTER TABLE users
+ADD COLUMN google_id VARCHAR(255) UNIQUE NULL AFTER password_hash,
+ADD COLUMN email VARCHAR(255) NULL AFTER google_id,
+ADD INDEX idx_google_id (google_id),
+ADD INDEX idx_email (email);
+
+-- Modify password_hash to be nullable (for Google OAuth users)
+ALTER TABLE users
+MODIFY COLUMN password_hash VARCHAR(60) NULL;
