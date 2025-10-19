@@ -2,12 +2,9 @@
 out/
 !**/src/main/**/out/
 !**/src/test/**/out/
-src/main/resources/client_secret.json
-tokens/
-*.log
+.kotlin
 target/
 .idea/workspace.xml
-.kotlin
 
 ### Eclipse ###
 .apt_generated
@@ -33,11 +30,8 @@ bin/
 
 ### Mac OS ###
 .DS_Store
-# OAuth Credentials (NEVER commit)
+
+### OAuth Credentials & Sensitive Data (NEVER commit) ###
 src/main/resources/client_secret.json
 tokens/
 *.log
-
-# OAuth Credentials (NEVER commit)
-src/main/resources/client_secret.json
-tokens/
