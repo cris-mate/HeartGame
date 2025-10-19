@@ -16,6 +16,7 @@ import java.util.Optional;
 public class UserDAO {
 
     private static final Logger logger = LoggerFactory.getLogger(UserDAO.class);
+    private static final String NO_CONNECTION_ERROR = "Cannot query database. No connection available.";
     private final Connection connection;
 
     public UserDAO() {
@@ -29,7 +30,7 @@ public class UserDAO {
      */
     public Optional<User> findByUsername(String username) {
         if (connection == null) {
-            logger.error("Cannot query database. No connection available.");
+            logger.error(NO_CONNECTION_ERROR);
             return Optional.empty();
         }
 
@@ -41,15 +42,7 @@ public class UserDAO {
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
-                User user = new User(
-                        rs.getInt("id"),
-                        rs.getString("username"),
-                        rs.getString("email"),
-                        rs.getString("display_name"),
-                        rs.getString("oauth_provider"),
-                        rs.getString("oauth_id")
-                );
-                return Optional.of(user);
+                return Optional.of(mapResultSetToUser(rs));
             }
             return Optional.empty();
         } catch (SQLException e) {
@@ -66,7 +59,7 @@ public class UserDAO {
      */
     public Optional<User> findByOAuthId(String oauthProvider, String oauthId) {
         if (connection == null) {
-            logger.error("Cannot query database. No connection available.");
+            logger.error(NO_CONNECTION_ERROR);
             return Optional.empty();
         }
 
@@ -79,15 +72,7 @@ public class UserDAO {
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
-                User user = new User(
-                        rs.getInt("id"),
-                        rs.getString("username"),
-                        rs.getString("email"),
-                        rs.getString("display_name"),
-                        rs.getString("oauth_provider"),
-                        rs.getString("oauth_id")
-                );
-                return Optional.of(user);
+                return Optional.of(mapResultSetToUser(rs));
             }
             return Optional.empty();
         } catch (SQLException e) {
@@ -204,5 +189,23 @@ public class UserDAO {
      */
     public boolean usernameExists(String username) {
         return findByUsername(username).isPresent();
+    }
+
+    /**
+     * Maps a ResultSet row to a User object
+     * Eliminates code duplication in findByUsername and findByOAuthId
+     * @param rs The ResultSet positioned at the current row
+     * @return A User object with data from the ResultSet
+     * @throws SQLException If column access fails
+     */
+    private User mapResultSetToUser(ResultSet rs) throws SQLException {
+        return new User(
+                rs.getInt("id"),
+                rs.getString("username"),
+                rs.getString("email"),
+                rs.getString("display_name"),
+                rs.getString("oauth_provider"),
+                rs.getString("oauth_id")
+        );
     }
 }

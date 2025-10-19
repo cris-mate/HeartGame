@@ -10,8 +10,8 @@ public class User {
     private final String username;
     private String email;
     private String displayName;
-    private String oauthProvider;  // "password", "google", etc.
-    private String oauthId;        // OAuth provider's user ID
+    private final String oauthProvider;
+    private String oauthId;
 
     /**
      * Constructs a new User with username only (legacy constructor)

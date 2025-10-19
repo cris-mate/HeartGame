@@ -44,9 +44,9 @@ public class GameController {
         // Get user from session or use passed parameter
         User sessionUser = UserSession.getInstance().getCurrentUser();
         User activeUser = sessionUser != null ? sessionUser : user;
-//        if (user == null) {
-//            throw new IllegalStateException("No authenticated user");
-//        }
+        if (activeUser == null) {
+            throw new IllegalStateException("No authenticated user");
+        }
         logger.info("Game started for user '{}'.", activeUser.getUsername());
         GameEventManager.getInstance().publish(GameEventType.GAME_STARTED, activeUser);
     }

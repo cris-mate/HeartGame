@@ -133,7 +133,7 @@ public class GoogleAuthService {
      * Builds the Google OAuth authorization URL
      * @return Authorization URL with all required parameters
      */
-    private String buildAuthorizationUrl() throws UnsupportedEncodingException {
+    private String buildAuthorizationUrl() {
         return AUTH_URL +
                 "?client_id=" + URLEncoder.encode(clientId, StandardCharsets.UTF_8) +
                 "&redirect_uri=" + URLEncoder.encode(redirectUri, StandardCharsets.UTF_8) +
@@ -166,7 +166,7 @@ public class GoogleAuthService {
                     String[] parts = requestLine.split(" ");
                     if (parts.length > 1) {
                         String path = parts[1];
-                        authCode = extractParameter(path, "code");
+                        authCode = extractParameter(path);
                     }
                 }
 
@@ -191,11 +191,11 @@ public class GoogleAuthService {
 
     /**
      * Extracts a parameter value from a URL query string
+     *
      * @param url The URL with query parameters
-     * @param paramName The parameter name to extract
      * @return The parameter value, or null if not found
      */
-    private String extractParameter(String url, String paramName) {
+    private String extractParameter(String url) {
         try {
             int queryStart = url.indexOf('?');
             if (queryStart == -1) return null;
@@ -205,7 +205,7 @@ public class GoogleAuthService {
 
             for (String param : params) {
                 String[] keyValue = param.split("=");
-                if (keyValue.length == 2 && keyValue[0].equals(paramName)) {
+                if (keyValue.length == 2 && keyValue[0].equals("code")) {
                     return URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8);
                 }
             }
@@ -325,10 +325,10 @@ public class GoogleAuthService {
      * @param params Map of parameter names to values
      * @return URL-encoded POST data string
      */
-    private String buildPostData(Map<String, String> params) throws UnsupportedEncodingException {
+    private String buildPostData(Map<String, String> params) {
         StringBuilder postData = new StringBuilder();
         for (Map.Entry<String, String> entry : params.entrySet()) {
-            if (postData.length() > 0) {
+            if (!postData.isEmpty()) {
                 postData.append('&');
             }
             postData.append(URLEncoder.encode(entry.getKey(), StandardCharsets.UTF_8));
