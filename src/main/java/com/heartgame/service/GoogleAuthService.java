@@ -66,6 +66,15 @@ public class GoogleAuthService {
     }
 
     /**
+     * URL-decodes a string value using UTF-8
+     * @param value The string to decode
+     * @return URL-decoded string
+     */
+    private String decode(String value) {
+        return URLDecoder.decode(value, StandardCharsets.UTF_8);
+    }
+
+    /**
      * Loads OAuth client credentials from client_secret.json
      * @return Properties containing client_id and client_secret
      */
@@ -185,7 +194,7 @@ public class GoogleAuthService {
                 out.println();
                 out.println("<html><body>");
                 out.println("<h1>Authentication Complete!</h1>");
-                out.println("<p>You can close this window and return to HeartGame.</p>");
+                out.println("<p>You can close this window and return to <strong>HeartGame</strong>.</p>");
                 out.println("</body></html>");
                 out.flush();
 
@@ -214,7 +223,7 @@ public class GoogleAuthService {
             for (String param : params) {
                 String[] keyValue = param.split("=");
                 if (keyValue.length == 2 && keyValue[0].equals("code")) {
-                    return encode(keyValue[1]);
+                    return decode(keyValue[1]);
                 }
             }
         } catch (Exception e) {

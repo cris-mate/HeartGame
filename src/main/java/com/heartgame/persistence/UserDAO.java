@@ -216,4 +216,13 @@ public class UserDAO {
                 rs.getString("oauth_id")
         );
     }
+
+    /**
+     * Utility method to hash a plaintext password using BCrypt
+     * @param plainPassword The plaintext password to hash
+     * @return BCrypt hashed password string
+     */
+    public static String hashPassword(String plainPassword) {
+        return BCrypt.hashpw(plainPassword, BCrypt.gensalt());
+    }
 }
