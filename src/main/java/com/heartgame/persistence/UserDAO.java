@@ -24,13 +24,25 @@ public class UserDAO {
     }
 
     /**
+     * Checks if database connection is available
+     * Logs error if connection is null
+     * @return true if connection is available, false otherwise
+     */
+    private boolean hasConnection() {
+        if (connection == null) {
+            logger.error(NO_CONNECTION_ERROR);
+            return false;
+        }
+        return true;
+    }
+
+    /**
      * Finds a user by username
      * @param username The username to search for
      * @return Optional containing the User if found, empty otherwise
      */
     public Optional<User> findByUsername(String username) {
-        if (connection == null) {
-            logger.error(NO_CONNECTION_ERROR);
+        if (!hasConnection()) {
             return Optional.empty();
         }
 
@@ -53,13 +65,12 @@ public class UserDAO {
 
     /**
      * Finds a user by OAuth provider and OAuth ID
-     * @param oauthProvider The OAuth provider (e.g., "google")
+     * @param oauthProvider The OAuth provider
      * @param oauthId The OAuth provider's user ID
      * @return Optional containing the User if found, empty otherwise
      */
     public Optional<User> findByOAuthId(String oauthProvider, String oauthId) {
-        if (connection == null) {
-            logger.error(NO_CONNECTION_ERROR);
+        if (!hasConnection()) {
             return Optional.empty();
         }
 
@@ -88,8 +99,7 @@ public class UserDAO {
      * @return True if password matches, false otherwise
      */
     public boolean verifyPassword(String username, String password) {
-        if (connection == null) {
-            logger.error("Cannot authenticate user. No database connection available.");
+        if (!hasConnection()) {
             return false;
         }
 
@@ -120,8 +130,7 @@ public class UserDAO {
      * @return True if creation succeeded, false otherwise
      */
     public boolean createUser(User user, String password) {
-        if (connection == null) {
-            logger.error("Cannot create user. No database connection available.");
+        if (!hasConnection()) {
             return false;
         }
 
@@ -166,8 +175,7 @@ public class UserDAO {
      * @param username The username
      */
     public void updateLastLogin(String username) {
-        if (connection == null) {
-            logger.error("Cannot update last login. No database connection available.");
+        if (!hasConnection()) {
             return;
         }
 

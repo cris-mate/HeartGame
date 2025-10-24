@@ -57,6 +57,15 @@ public class GoogleAuthService {
     }
 
     /**
+     * URL-encodes a string value using UTF-8
+     * @param value The string to encode
+     * @return URL-encoded string
+     */
+    private String encode(String value) {
+        return URLEncoder.encode(value, StandardCharsets.UTF_8);
+    }
+
+    /**
      * Loads OAuth client credentials from client_secret.json
      * @return Properties containing client_id and client_secret
      */
@@ -135,10 +144,10 @@ public class GoogleAuthService {
      */
     private String buildAuthorizationUrl() {
         return AUTH_URL +
-                "?client_id=" + URLEncoder.encode(clientId, StandardCharsets.UTF_8) +
-                "&redirect_uri=" + URLEncoder.encode(redirectUri, StandardCharsets.UTF_8) +
+                "?client_id=" + encode(clientId) +
+                "&redirect_uri=" + encode(redirectUri) +
                 "&response_type=code" +
-                "&scope=" + URLEncoder.encode(SCOPES, StandardCharsets.UTF_8) +
+                "&scope=" + encode(SCOPES) +
                 "&access_type=offline";
     }
 
@@ -191,7 +200,6 @@ public class GoogleAuthService {
 
     /**
      * Extracts a parameter value from a URL query string
-     *
      * @param url The URL with query parameters
      * @return The parameter value, or null if not found
      */
@@ -206,7 +214,7 @@ public class GoogleAuthService {
             for (String param : params) {
                 String[] keyValue = param.split("=");
                 if (keyValue.length == 2 && keyValue[0].equals("code")) {
-                    return URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8);
+                    return encode(keyValue[1]);
                 }
             }
         } catch (Exception e) {
@@ -269,7 +277,7 @@ public class GoogleAuthService {
      */
     private User fetchUserInfo(String accessToken) {
         try {
-            URL url = new URL(USERINFO_URL + "?access_token=" + URLEncoder.encode(accessToken, StandardCharsets.UTF_8));
+            URL url = new URL(USERINFO_URL + "?access_token=" + encode(accessToken));
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
 
@@ -331,9 +339,9 @@ public class GoogleAuthService {
             if (!postData.isEmpty()) {
                 postData.append('&');
             }
-            postData.append(URLEncoder.encode(entry.getKey(), StandardCharsets.UTF_8));
+            postData.append(encode(entry.getKey()));
             postData.append('=');
-            postData.append(URLEncoder.encode(entry.getValue(), StandardCharsets.UTF_8));
+            postData.append(encode(entry.getValue()));
         }
         return postData.toString();
     }
