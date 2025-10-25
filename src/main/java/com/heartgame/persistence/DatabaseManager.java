@@ -6,16 +6,17 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Manages the database connection as a Singleton
  * Reads configuration from a properties file
+ * Uses SLF4J for consistent logging with logback
  */
 public final class DatabaseManager {
 
-    private static final Logger logger = Logger.getLogger(DatabaseManager.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(DatabaseManager.class);
     private static DatabaseManager instance;
     private Connection connection;
 
@@ -24,7 +25,7 @@ public final class DatabaseManager {
             Properties props = new Properties();
             try (InputStream input = getClass().getClassLoader().getResourceAsStream("database.properties")) {
                 if (input == null) {
-                    logger.severe("Database properties file not found.");
+                    logger.error("Database properties file not found.");
                     return;
                 }
                 props.load(input);
@@ -36,8 +37,9 @@ public final class DatabaseManager {
                     props.getProperty("db.username"),
                     props.getProperty("db.password")
             );
+            logger.info("Database connection established successfully");
         } catch  (SQLException | ClassNotFoundException | IOException e) {
-            logger.log(Level.SEVERE, "Failed to connect to the database.", e);
+            logger.error("Failed to connect to the database.", e);
         }
     }
 
@@ -55,6 +57,32 @@ public final class DatabaseManager {
      * @return The active database connection.
      */
     public Connection getConnection() {
+        if (connection != null) {
+            try {
+                if (!connection.isValid(2)) {
+                    logger.warn("Connection validation failed, attempting to reconnect...");
+                    instance = null;
+                    return getInstance().getConnection();
+                }
+            } catch (SQLException e) {
+                logger.error("Error validating connection", e);
+            }
+        }
         return this.connection;
+    }
+
+    /**
+     * Closes the database connection
+     * Should be called on application shutdown
+     */
+    public void closeConnection() {
+        if (connection != null) {
+            try {
+                connection.close();
+                logger.info("Database connection closed");
+            } catch (SQLException e) {
+                logger.error("Error closing database connection", e);
+            }
+        }
     }
 }

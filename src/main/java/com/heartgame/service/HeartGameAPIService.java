@@ -9,18 +9,23 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Handles communication with the external Heart Game API to fetch questions
  * Uses ConfigurationManager for externalized API URL
+ * Uses SLF4J logging and implements HTTP timeouts
  */
 public class HeartGameAPIService implements APIService {
 
-    private static final Logger logger = Logger.getLogger(HeartGameAPIService.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(HeartGameAPIService.class);
+    private static final int CONNECTION_TIMEOUT = 30000;
+    private static final int READ_TIMEOUT = 30000;
     private final String apiUrl;
 
     /**
@@ -38,33 +43,43 @@ public class HeartGameAPIService implements APIService {
 
     /**
      * Reads the content from a given URL and returns it as a String
+     * Implements connection and read timeouts
      * @param urlString The URL to read from
-     * @return The content of the URL as a String, or null if an error occurs
+     * @return The content of the URL as a String
+     * @throws IOException if an error occurs during network communication
      */
     private static String readUrl(String urlString) throws IOException {
         URL url = new URL(urlString);
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
-        try (InputStream inputStream = url.openStream();
-             ByteArrayOutputStream result = new ByteArrayOutputStream()) {
-            byte[] buffer = new byte[1024];
-            int length;
-            while ((length = inputStream.read(buffer)) != -1) {
-                result.write(buffer, 0, length);
+        try {
+            // Set timeouts to prevent indefinite hanging
+            connection.setConnectTimeout(CONNECTION_TIMEOUT);
+            connection.setReadTimeout(READ_TIMEOUT);
+
+            try (InputStream inputStream = connection.getInputStream();
+                 ByteArrayOutputStream result = new ByteArrayOutputStream()) {
+                byte[] buffer = new byte[1024];
+                int length;
+                while ((length = inputStream.read(buffer)) != -1) {
+                    result.write(buffer, 0, length);
+                }
+                return result.toString(StandardCharsets.UTF_8);
             }
-            return result.toString(StandardCharsets.UTF_8);
         } catch (IOException e) {
-            logger.severe("Error reading from URL: " + urlString + " - " + e.getMessage());
+            logger.error("Error reading from URL: {} - {}", urlString, e.getMessage());
             throw new IOException("An error occurred while reading URL: " + urlString, e);
+        } finally {
+            connection.disconnect();
         }
     }
 
     /**
-     * Fetches a random game question from the Heart game API
+     * Fetches a random game question from the HeartGame API
      * @return A new Question object or null if an error occurs
      * @throws IOException if fetching or parsing the game data fails
      */
     public Question getNewQuestion() throws IOException {
-
         BufferedImage image;
         int solution;
 
@@ -93,12 +108,14 @@ public class HeartGameAPIService implements APIService {
                     throw new IllegalArgumentException("Solution out of expected range (0-9)");
                 }
             } catch (NumberFormatException e) {
-                logger.severe("Unexpected solution format received from API: " + e.getMessage());
+                logger.error("Unexpected solution format received from API: " + e.getMessage());
                 throw new IOException("Invalid solution format in API response", e);
             }
+
+            logger.debug("Successfully fetched new question with solution: {}", solution);
             return new Question(image, solution);
         } catch (IOException e) {
-            logger.severe("Failed to parse game data from API: " + e.getMessage());
+            logger.error("Failed to parse game data from API: {}", e.getMessage());
             throw new IOException("Failed to read or parse game data from API", e);
         }
     }

@@ -10,5 +10,6 @@ public enum GameEventType {
     PLAYER_LOGGED_IN,
     QUESTION_LOADED,
     API_ERROR,
-    USER_LOGGED_OUT
+    USER_LOGGED_OUT,
+    TIMER_EXPIRED
 }
