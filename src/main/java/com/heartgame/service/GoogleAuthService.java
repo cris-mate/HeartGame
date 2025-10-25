@@ -1,12 +1,12 @@
 package com.heartgame.service;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.heartgame.model.User;
 import com.heartgame.util.ConfigurationManager;
+
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.awt.Desktop;
 import java.io.*;
 import java.net.*;
@@ -23,11 +23,14 @@ import java.util.Properties;
 public class GoogleAuthService {
 
     private static final Logger logger = LoggerFactory.getLogger(GoogleAuthService.class);
+    private static final int CONNECTION_TIMEOUT = 30000;
+    private static final int READ_TIMEOUT = 30000;
+    private static final int CALLBACK_TIMEOUT = 120000;
 
-    // OAuth endpoints
-    private static final String AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth";
-    private static final String TOKEN_URL = "https://oauth2.googleapis.com/token";
-    private static final String USERINFO_URL = "https://www.googleapis.com/oauth2/v2/userinfo";
+    // OAuth endpoints - now configurable via application.properties
+    private final String authUrl;
+    private final String tokenUrl;
+    private final String userinfoUrl;
 
     // OAuth scopes
     private static final String SCOPES = "https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile";
@@ -39,12 +42,20 @@ public class GoogleAuthService {
 
     /**
      * Constructs a new GoogleAuthService
-     * Loads OAuth credentials from client_secret.json
+     * Loads OAuth credentials from client_secret.json and URLs from configuration
      */
     public GoogleAuthService() {
         ConfigurationManager config = ConfigurationManager.getInstance();
         this.callbackPort = config.getOAuthCallbackPort();
         this.redirectUri = "http://localhost:" + callbackPort;
+
+        // Load OAuth URLs from configuration with defaults
+        this.authUrl = config.getProperty("google.oauth.auth.url",
+                "https://accounts.google.com/o/oauth2/v2/auth");
+        this.tokenUrl = config.getProperty("google.oauth.token.url",
+                "https://oauth2.googleapis.com/token");
+        this.userinfoUrl = config.getProperty("google.oauth.userinfo.url",
+                "https://www.googleapis.com/oauth2/v2/userinfo");
 
         // Load client credentials from file
         Properties credentials = loadClientCredentials();
@@ -57,24 +68,6 @@ public class GoogleAuthService {
     }
 
     /**
-     * URL-encodes a string value using UTF-8
-     * @param value The string to encode
-     * @return URL-encoded string
-     */
-    private String encode(String value) {
-        return URLEncoder.encode(value, StandardCharsets.UTF_8);
-    }
-
-    /**
-     * URL-decodes a string value using UTF-8
-     * @param value The string to decode
-     * @return URL-decoded string
-     */
-    private String decode(String value) {
-        return URLDecoder.decode(value, StandardCharsets.UTF_8);
-    }
-
-    /**
      * Loads OAuth client credentials from client_secret.json
      * @return Properties containing client_id and client_secret
      */
@@ -83,6 +76,12 @@ public class GoogleAuthService {
         try (InputStream input = getClass().getResourceAsStream("/client_secret.json")) {
             if (input == null) {
                 logger.error("client_secret.json not found in resources");
+                logger.error("Please obtain OAuth credentials from Google Cloud Console:");
+                logger.error("1. Go to https://console.cloud.google.com/");
+                logger.error("2. Create a new project or select existing one");
+                logger.error("3. Enable Google+ API");
+                logger.error("4. Create OAuth 2.0 credentials (Desktop application type)");
+                logger.error("5. Download JSON and place in src/main/resources/client_secret.json");
                 return props;
             }
 
@@ -98,6 +97,7 @@ public class GoogleAuthService {
             if (credentials != null) {
                 props.setProperty("client_id", credentials.get("client_id").getAsString());
                 props.setProperty("client_secret", credentials.get("client_secret").getAsString());
+                logger.info("OAuth credentials loaded successfully");
             }
 
         } catch (Exception e) {
@@ -152,22 +152,22 @@ public class GoogleAuthService {
      * @return Authorization URL with all required parameters
      */
     private String buildAuthorizationUrl() {
-        return AUTH_URL +
-                "?client_id=" + encode(clientId) +
-                "&redirect_uri=" + encode(redirectUri) +
+        return authUrl +
+                "?client_id=" + URLEncoder.encode(clientId, StandardCharsets.UTF_8) +
+                "&redirect_uri=" + URLEncoder.encode(redirectUri, StandardCharsets.UTF_8) +
                 "&response_type=code" +
-                "&scope=" + encode(SCOPES) +
+                "&scope=" + URLEncoder.encode(SCOPES, StandardCharsets.UTF_8) +
                 "&access_type=offline";
     }
 
     /**
      * Starts a local HTTP server and waits for OAuth callback
+     * Has configurable timeout
      * @return Authorization code from callback, or null if timeout/error
      */
     private String waitForCallback() {
         try (ServerSocket serverSocket = new ServerSocket(callbackPort)) {
-            serverSocket.setSoTimeout(120000); // 2 minute timeout
-
+            serverSocket.setSoTimeout(CALLBACK_TIMEOUT);
             logger.info("Waiting for OAuth callback on port {}...", callbackPort);
 
             try (Socket socket = serverSocket.accept();
@@ -223,7 +223,7 @@ public class GoogleAuthService {
             for (String param : params) {
                 String[] keyValue = param.split("=");
                 if (keyValue.length == 2 && keyValue[0].equals("code")) {
-                    return decode(keyValue[1]);
+                    return URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8);
                 }
             }
         } catch (Exception e) {
@@ -234,15 +234,18 @@ public class GoogleAuthService {
 
     /**
      * Exchanges authorization code for access token
+     * Implements HTTP timeouts
      * @param authorizationCode The authorization code from callback
      * @return Access token, or null if exchange fails
      */
     private String exchangeCodeForToken(String authorizationCode) {
         try {
-            URL url = new URL(TOKEN_URL);
+            URL url = new URL(tokenUrl);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
             conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+            conn.setConnectTimeout(CONNECTION_TIMEOUT);
+            conn.setReadTimeout(READ_TIMEOUT);
             conn.setDoOutput(true);
 
             // Build POST data
@@ -281,14 +284,17 @@ public class GoogleAuthService {
 
     /**
      * Fetches user profile information from Google
+     * Implements HTTP timeouts
      * @param accessToken The OAuth access token
      * @return User object with profile data, or null if fetch fails
      */
     private User fetchUserInfo(String accessToken) {
         try {
-            URL url = new URL(USERINFO_URL + "?access_token=" + encode(accessToken));
+            URL url = new URL(userinfoUrl + "?access_token=" + URLEncoder.encode(accessToken, StandardCharsets.UTF_8));
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
+            conn.setConnectTimeout(CONNECTION_TIMEOUT);
+            conn.setReadTimeout(READ_TIMEOUT);
 
             int responseCode = conn.getResponseCode();
             if (responseCode == 200) {
@@ -348,9 +354,9 @@ public class GoogleAuthService {
             if (!postData.isEmpty()) {
                 postData.append('&');
             }
-            postData.append(encode(entry.getKey()));
+            postData.append(URLEncoder.encode(entry.getKey(), StandardCharsets.UTF_8));
             postData.append('=');
-            postData.append(encode(entry.getValue()));
+            postData.append(URLEncoder.encode(entry.getValue(), StandardCharsets.UTF_8));
         }
         return postData.toString();
     }
