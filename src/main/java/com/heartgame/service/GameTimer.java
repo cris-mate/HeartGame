@@ -34,6 +34,11 @@ public class GameTimer implements GameEventListener {
          * @param isWarning True if in warning state (last 10 seconds)
          */
         void onTimerUpdate(int remainingSeconds, boolean isWarning);
+
+        /**
+         * Called when timer reaches zero
+         */
+        void onTimerExpired();
     }
 
     /**
