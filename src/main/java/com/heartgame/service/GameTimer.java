@@ -5,7 +5,6 @@ import com.heartgame.event.GameEventManager;
 import com.heartgame.event.GameEventType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import javax.swing.Timer;
 
 /**
@@ -17,9 +16,7 @@ import javax.swing.Timer;
 public class GameTimer implements GameEventListener {
 
     private static final Logger logger = LoggerFactory.getLogger(GameTimer.class);
-    private static final int TIME_LIMIT_SECONDS = 60;
-    private static final int WARNING_THRESHOLD = 10; // Last 10 seconds show warning
-
+    private static final int TIME_LIMIT = 60;
     private int remainingTime;
     private Timer swingTimer;
     private final TimerUpdateListener updateListener;
@@ -31,9 +28,8 @@ public class GameTimer implements GameEventListener {
         /**
          * Called every second as the timer counts down
          * @param remainingSeconds Time remaining in seconds
-         * @param isWarning True if in warning state (last 10 seconds)
          */
-        void onTimerUpdate(int remainingSeconds, boolean isWarning);
+        void onTimerUpdate(int remainingSeconds);
 
         /**
          * Called when timer reaches zero
@@ -49,10 +45,8 @@ public class GameTimer implements GameEventListener {
     public GameTimer(TimerUpdateListener updateListener) {
         this.updateListener = updateListener;
 
-        // Subscribe to game start event only
         GameEventManager.getInstance().subscribe(GameEventType.GAME_STARTED, this);
-
-        logger.debug("GameTimer initialized with {}s session time limit", TIME_LIMIT_SECONDS);
+        logger.debug("GameTimer initialized with {}s session time limit", TIME_LIMIT);
     }
 
     /**
@@ -75,31 +69,30 @@ public class GameTimer implements GameEventListener {
     private void startTimer() {
         stopTimer(); // Cancel any existing timer
 
-        remainingTime = TIME_LIMIT_SECONDS;
+        remainingTime = TIME_LIMIT;
         logger.debug("Starting timer: {}s", remainingTime);
 
         // Create Swing timer that fires every second
         swingTimer = new Timer(1000, e -> {
             remainingTime--;
-            boolean isWarning = remainingTime <= WARNING_THRESHOLD;
 
-            logger.trace("Timer tick: {}s remaining (warning: {})", remainingTime, isWarning);
+            logger.trace("Timer tick: {}s remaining.", remainingTime);
 
             // Notify UI of update
-            updateListener.onTimerUpdate(remainingTime, isWarning);
+            updateListener.onTimerUpdate(remainingTime);
 
             // Check if time expired
             if (remainingTime <= 0) {
-                logger.info("Timer expired - no answer submitted in time");
+                logger.info("Timer expired - game over");
                 stopTimer();
-                GameEventManager.getInstance().publish(GameEventType.TIMER_EXPIRED, null);
+                updateListener.onTimerExpired();
             }
         });
 
         swingTimer.start();
 
         // Send initial update immediately
-        updateListener.onTimerUpdate(remainingTime, false);
+        updateListener.onTimerUpdate(remainingTime);
     }
 
     /**
@@ -115,10 +108,10 @@ public class GameTimer implements GameEventListener {
     }
 
     /**
-     * @return The time limit in seconds for each question
+     * @return The time limit in seconds for the game
      */
     public static int getTimeLimit() {
-        return TIME_LIMIT_SECONDS;
+        return TIME_LIMIT;
     }
 
     /**

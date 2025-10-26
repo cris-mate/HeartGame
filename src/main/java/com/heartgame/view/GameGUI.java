@@ -25,10 +25,9 @@ public class GameGUI extends JFrame implements GameEventListener {
 
     private final JLabel questArea = new JLabel();
     private final JTextArea infoArea = new JTextArea(1, 40);
-    private final JButton[] buttons = new JButton[10];
-    private final JButton logoutButton = new JButton("Logout");
+    private final JLabel timerLabel = new JLabel("Time: 60s");
+    private final JButton[] solutionButton = new JButton[10];
     private final User user;
-    private GameController controller;
 
     /**
      * Constructs the main game GUI, initializes all UI components,
@@ -36,7 +35,7 @@ public class GameGUI extends JFrame implements GameEventListener {
      * @param user The logged-in user
      */
     public GameGUI(User user) {
-        super("What is the missing value? - Playing as: " + user.getUsername());
+        super("How many hearts are there? - Playing as: " + user.getUsername());
         this.user = user;
 
         setSize(690, 550);
@@ -45,20 +44,26 @@ public class GameGUI extends JFrame implements GameEventListener {
         JPanel mainPanel = new JPanel(new BorderLayout());
         JPanel gamePanel = new JPanel();
 
+        // Timer label at the top
+        timerLabel.setFont(new Font("Arial", Font.BOLD, 24));
+        timerLabel.setForeground(Color.BLACK);
+        timerLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        mainPanel.add(timerLabel);
+
         infoArea.setEditable(false);
         JScrollPane infoPane = new JScrollPane(infoArea);
-        gamePanel.add(infoPane);
+        mainPanel.add(infoPane);
 
         questArea.setSize(330, 600);
         JScrollPane questPane = new JScrollPane(questArea);
         gamePanel.add(questPane);
 
         // Create solution buttons panel
-        JPanel buttonPanel = new JPanel(new GridLayout(2, 5, 5, 5));
+        JPanel buttonPanel = new JPanel(new GridLayout(1, 10, 5, 10));
         for (int i = 0; i < 10; i++) {
-            buttons[i] = new JButton(String.valueOf(i));
-            buttons[i].setActionCommand(String.valueOf(i));
-            buttonPanel.add(buttons[i]);
+            solutionButton[i] = new JButton(String.valueOf(i));
+            solutionButton[i].setActionCommand(String.valueOf(i));
+            buttonPanel.add(solutionButton[i]);
         }
         gamePanel.add(buttonPanel);
 
@@ -66,6 +71,7 @@ public class GameGUI extends JFrame implements GameEventListener {
 
         // Add logout button at the top
         JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JButton logoutButton = new JButton("Logout");
         logoutButton.setBackground(new Color(220, 53, 69)); // Bootstrap danger red
         logoutButton.setForeground(Color.WHITE);
         logoutButton.setFocusPainted(false);
@@ -80,8 +86,7 @@ public class GameGUI extends JFrame implements GameEventListener {
         GameEventManager.getInstance().subscribe(GameEventType.CORRECT_ANSWER_SUBMITTED, this);
         GameEventManager.getInstance().subscribe(GameEventType.INCORRECT_ANSWER_SUBMITTED, this);
 
-        // Initialize controller
-        this.controller = new GameController(this, user);
+        new GameController(this, user);
     }
 
     /**
@@ -97,7 +102,7 @@ public class GameGUI extends JFrame implements GameEventListener {
 
     /**
      * Handles game events to provide visual feedback to the user
-     * Updates the info text based on whether a correct or incorrect answer was submitted
+     * Updates the info text based on whether a correct or incorrect solution was submitted
      * @param eventType The type of event that occurred
      * @param data      The current score, passed as an Integer
      */
@@ -112,7 +117,7 @@ public class GameGUI extends JFrame implements GameEventListener {
     }
 
     /**
-     * Handles logout button click
+     * Handles logout button
      * Publishes logout event, cleans up, and returns to login screen
      */
     private void handleLogout() {
@@ -162,12 +167,26 @@ public class GameGUI extends JFrame implements GameEventListener {
     }
 
     /**
+     * Updates the timer display
+     * @param secondsRemaining The number of seconds remaining
+     */
+    public void updateTimer(int secondsRemaining) {
+        timerLabel.setText("Time: " + secondsRemaining + "s");
+        // Change to warning color in last 10 seconds
+        if (secondsRemaining <= 10) {
+            timerLabel.setForeground(Color.RED);
+        } else {
+            timerLabel.setForeground(Color.BLACK);
+        }
+    }
+
+    /**
      * Returns the button at the specified index
      * @param index The index of the button (0-9)
      * @return The JButton at that index
      */
     public JButton getButton(int index) {
-        return buttons[index];
+        return solutionButton[index];
     }
 
     /**
@@ -179,37 +198,32 @@ public class GameGUI extends JFrame implements GameEventListener {
     }
 
     /**
-     * Enables all answer buttons
+     * Enables all solution buttons
      */
-    public void enableAnswerButtons() {
-        for (JButton button : buttons) {
+    public void enableSolutionButtons() {
+        for (JButton button : solutionButton) {
             button.setEnabled(true);
         }
     }
 
     /**
-     * Disables all answer buttons
+     * Disables all solution buttons
      */
-    public void disableAnswerButtons() {
-        for (JButton button : buttons) {
+    public void disableSolutionButtons() {
+        for (JButton button : solutionButton) {
             button.setEnabled(false);
         }
     }
 
     /**
-     * Updates the timer display in the info area
-     * @param timeRemaining Time remaining in seconds
+     * Shows the game over message with final score
+     * @param finalScore The player's final score
      */
-    public void updateTimer(int timeRemaining) {
-        String currentText = infoArea.getText();
-        // Add timer to the end of current text
-        if (currentText.contains("Time:")) {
-            // Replace existing timer
-            infoArea.setText(currentText.replaceAll("Time: \\d+s", "Time: " + timeRemaining + "s"));
-        } else {
-            // Add timer
-            infoArea.setText(currentText + "   Time: " + timeRemaining + "s");
-        }
+    public void showGameOver(int finalScore) {
+        JOptionPane.showMessageDialog(this,
+                "Time's up!\nYour final score: " + finalScore + ".",
+                "Game Over",
+                JOptionPane.INFORMATION_MESSAGE);
     }
 
     /**
