@@ -60,14 +60,12 @@ public class User {
     public int getId() { return id; }
     public String getUsername() { return username; }
     public String getEmail() { return email; }
-    public String getDisplayName() { return displayName != null ? displayName : username; }
     public String getOauthProvider() { return oauthProvider; }
     public String getOauthId() { return oauthId; }
 
     // Setters (for DAO updates)
     public void setId(int id) { this.id = id; }
     public void setEmail(String email) { this.email = email; }
-    public void setDisplayName(String displayName) { this.displayName = displayName; }
 
     /**
      * @return True if this user authenticates via OAuth, false for password-based
@@ -82,7 +80,6 @@ public class User {
                 "id=" + id +
                 ", username='" + username + '\'' +
                 ", email='" + email + '\'' +
-                ", displayName='" + displayName + '\'' +
                 ", oauthProvider='" + oauthProvider + '\'' +
                 '}';
     }

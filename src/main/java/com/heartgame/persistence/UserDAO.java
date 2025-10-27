@@ -148,7 +148,7 @@ public class UserDAO {
             }
 
             stmt.setString(3, user.getEmail());
-            stmt.setString(4, user.getDisplayName());
+            stmt.setString(4, user.getUsername());
             stmt.setString(5, user.getOauthProvider());
             stmt.setString(6, user.getOauthId());
 

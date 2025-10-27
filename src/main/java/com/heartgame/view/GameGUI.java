@@ -25,10 +25,15 @@ public class GameGUI extends JFrame implements GameEventListener {
 
     private final JLabel questArea = new JLabel();
     private final JTextArea infoArea = new JTextArea(1, 40);
-    private final JLabel timerLabel = new JLabel("Time: 60s");
+    private final JLabel timerLabel = new JLabel("Starting Time: 60s");
+    private final JLabel scoreLabel = new JLabel("Score: 0");
     private final JButton[] solutionButton = new JButton[10];
     private final User user;
     private final GameController controller;
+
+    // Store current game state for display
+    private int currentScore = 0;
+    private int remainingTime = 60;
 
     /**
      * Constructs the main game GUI, initializes all UI components,
@@ -54,7 +59,7 @@ public class GameGUI extends JFrame implements GameEventListener {
 
         // User info (left side)
         JPanel userPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        JLabel userLabel = new JLabel("Playing as: " + user.getDisplayName());
+        JLabel userLabel = new JLabel("Playing as: " + user.getUsername());
         userLabel.setFont(new Font("Arial", Font.BOLD, 14));
         userLabel.setForeground(new Color(0, 123, 255)); // Blue
         userPanel.add(userLabel);
@@ -62,11 +67,23 @@ public class GameGUI extends JFrame implements GameEventListener {
 
         // Control buttons (right side)
         JPanel controlButtonsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        JButton exitGameButton = new JButton("Exit Game");
-        exitGameButton.setFocusPainted(false);
-        exitGameButton.setFont(new Font("Arial", Font.BOLD, 14));
-        exitGameButton.addActionListener(e -> handleLogout());
-        controlButtonsPanel.add(exitGameButton);
+
+        // Start New Game button
+        JButton startNewGameButton = new JButton("Start New Game");
+        startNewGameButton.setFocusPainted(false);
+        startNewGameButton.setFont(new Font("Arial", Font.BOLD, 14));
+        startNewGameButton.setPreferredSize(new Dimension(150, 50));
+        startNewGameButton.addActionListener(e -> handleStartNewGame());
+        controlButtonsPanel.add(startNewGameButton);
+
+        // Logout button
+        JButton logoutButton = new JButton("Logout");
+        logoutButton.setFocusPainted(false);
+        logoutButton.setFont(new Font("Arial", Font.BOLD, 14));
+        logoutButton.setPreferredSize(new Dimension(100, 50));
+        logoutButton.addActionListener(e -> handleLogout());
+        controlButtonsPanel.add(logoutButton);
+
         topPanel.add(controlButtonsPanel, BorderLayout.EAST);
 
         mainPanel.add(topPanel, BorderLayout.NORTH);
@@ -74,11 +91,11 @@ public class GameGUI extends JFrame implements GameEventListener {
         JPanel centerPanel = new JPanel(new BorderLayout());
         centerPanel.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createTitledBorder(
-                        BorderFactory.createLineBorder(Color.GRAY, 2),
+                        BorderFactory.createLineBorder(Color.GRAY, 1),
                         "How many hearts are there?",
                         0,
                         0,
-                        new Font("Arial", Font.BOLD, 16)
+                        new Font("Arial", Font.BOLD, 20)
                 ),
                 BorderFactory.createEmptyBorder(10, 10, 10, 10)
         ));
@@ -97,19 +114,20 @@ public class GameGUI extends JFrame implements GameEventListener {
         JPanel bottomPanel = new JPanel(new BorderLayout(10, 10));
         bottomPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 
-        // Timer (left side)
+        // Timer and Score panel
         JPanel infoPanel = new JPanel(new BorderLayout());
         infoPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 
+        // Timer (left side)
         JPanel timerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         timerLabel.setFont(new Font("Arial", Font.BOLD, 20));
-        timerLabel.setForeground(new Color(0, 123, 255)); // Blue
+        timerLabel.setForeground(Color.BLUE);
         timerPanel.add(timerLabel);
 
         // Score (right side)
         JPanel scorePanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        JLabel scoreLabel = new JLabel("Score: ");
         scoreLabel.setFont(new Font("Arial", Font.BOLD, 20));
+        timerLabel.setForeground(Color.BLUE);
         scorePanel.add(scoreLabel);
 
         infoPanel.add(timerPanel, BorderLayout.WEST);
@@ -125,8 +143,6 @@ public class GameGUI extends JFrame implements GameEventListener {
             solutionButton[i].setActionCommand(String.valueOf(i));
             solutionButton[i].setFont(new Font("Arial", Font.BOLD, 24));
             solutionButton[i].setPreferredSize(new Dimension(40, 40));
-            //solutionButton[i].setBackground(new Color(0, 123, 255)); // Blue
-            solutionButton[i].setForeground(new Color(0, 123, 255));
             solutionButton[i].setFocusPainted(false);
             solutionButton[i].setBorder(BorderFactory.createRaisedBevelBorder());
 
@@ -183,11 +199,44 @@ public class GameGUI extends JFrame implements GameEventListener {
      */
     @Override
     public void onGameEvent(GameEventType eventType, Object data) {
-        int currentScore = (int) data;
         if (eventType == GameEventType.CORRECT_ANSWER_SUBMITTED) {
-            updateInfo("Good! Score: " + currentScore);
+            updateInfo("Good! Keep going!");
+            updateScore((int) data);
+            scoreLabel.setForeground(Color.GREEN);
         } else if (eventType == GameEventType.INCORRECT_ANSWER_SUBMITTED) {
-            updateInfo("Oops. Try again! Score: " + currentScore);
+            updateInfo("Oops. Try again!");
+            scoreLabel.setForeground(Color.RED);
+        }
+    }
+
+    /**
+     * Handles the Start New Game button
+     * Restarts the game with a fresh session
+     */
+    private void handleStartNewGame() {
+        int confirm = JOptionPane.showConfirmDialog(
+                this,
+                "Are you sure you want to start a new game?\nYour current progress will be lost.",
+                "Start New Game?",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE
+        );
+
+        if (confirm == JOptionPane.YES_OPTION) {
+            // Cleanup current controller
+            if (controller != null) {
+                controller.cleanup();
+            }
+
+            // Unsubscribe from events
+            GameEventManager.getInstance().unsubscribe(GameEventType.CORRECT_ANSWER_SUBMITTED, this);
+            GameEventManager.getInstance().unsubscribe(GameEventType.INCORRECT_ANSWER_SUBMITTED, this);
+
+            // Close this window
+            this.dispose();
+
+            // Open new game window
+            SwingUtilities.invokeLater(() -> new GameGUI(user).setVisible(true));
         }
     }
 
@@ -236,7 +285,7 @@ public class GameGUI extends JFrame implements GameEventListener {
     public void updateQuestion(BufferedImage image, int score) {
         ImageIcon ii = new ImageIcon(image);
         questArea.setIcon(ii);
-        updateInfo("How many hearts are there?   Score: " + score, null);
+        updateInfo("How many hearts are there?");
     }
 
     /**
@@ -255,10 +304,8 @@ public class GameGUI extends JFrame implements GameEventListener {
     public void updateInfo(String message, Color color) {
         infoArea.setText(message);
         if (color != null) {
-            infoArea.setBackground(color);
-            infoArea.setForeground(Color.WHITE);
+            infoArea.setForeground(color);
         } else {
-            infoArea.setBackground(new Color(248, 249, 250));
             infoArea.setForeground(Color.BLACK);
         }
     }
@@ -268,20 +315,33 @@ public class GameGUI extends JFrame implements GameEventListener {
      * @param secondsRemaining The number of seconds remaining
      */
     public void updateTimer(int secondsRemaining) {
-        timerLabel.setText("⏱ Time: " + secondsRemaining + "s");
+        this.remainingTime = secondsRemaining;
+        timerLabel.setText("Time: " + secondsRemaining + "s");
         // Change to warning color in last 10 seconds
         if (secondsRemaining <= 10) {
             timerLabel.setForeground(Color.RED);
-            // Add blinking effect in last 5 seconds
-            if (secondsRemaining <= 5) {
-                timerLabel.setFont(new Font("Arial", Font.BOLD, 32));
-            }
-        } else if (secondsRemaining <= 20) {
-            timerLabel.setForeground(new Color(255, 165, 0)); // Orange
+            timerLabel.setFont(new Font("Arial", Font.BOLD, 24));
         } else {
             timerLabel.setForeground(new Color(0, 123, 255)); // Blue
-            timerLabel.setFont(new Font("Arial", Font.BOLD, 28));
+            timerLabel.setFont(new Font("Arial", Font.PLAIN, 24));
         }
+    }
+
+    /**
+     * Updates the score display - simplified method for controller access
+     * @param score The score value to display
+     */
+    public void updateScore(int score) {
+        this.currentScore = score;
+        scoreLabel.setText("Score: " + score);
+    }
+
+    /**
+     * Gets the current score
+     * @return The current score value
+     */
+    public int getCurrentScore() {
+        return currentScore;
     }
 
     /**
@@ -307,6 +367,7 @@ public class GameGUI extends JFrame implements GameEventListener {
     public void enableSolutionButtons() {
         for (JButton button : solutionButton) {
             button.setEnabled(true);
+            button.setBackground(new Color(0, 123, 255));
         }
     }
 
@@ -316,6 +377,7 @@ public class GameGUI extends JFrame implements GameEventListener {
     public void disableSolutionButtons() {
         for (JButton button : solutionButton) {
             button.setEnabled(false);
+            button.setBackground(Color.GRAY);
         }
     }
 
@@ -329,7 +391,7 @@ public class GameGUI extends JFrame implements GameEventListener {
         panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         JLabel messageLabel = new JLabel("<html><center>" +
-                "<h2>⏰ Time's Up!</h2>" +
+                "<h2>Time's Up!</h2>" +
                 "<p style='font-size:14px; margin-top:10px;'>Your final score:</p>" +
                 "<p style='font-size:36px; color:#0066cc; font-weight:bold;'>" + finalScore + "</p>" +
                 "</center></html>");
@@ -353,6 +415,13 @@ public class GameGUI extends JFrame implements GameEventListener {
         );
 
         if (playAgain == JOptionPane.YES_OPTION) {
+            if (controller != null) {
+                controller.cleanup();
+            }
+
+            GameEventManager.getInstance().unsubscribe(GameEventType.CORRECT_ANSWER_SUBMITTED, this);
+            GameEventManager.getInstance().unsubscribe(GameEventType.INCORRECT_ANSWER_SUBMITTED, this);
+
             // Restart the game
             this.dispose();
             SwingUtilities.invokeLater(() -> new GameGUI(user).setVisible(true));

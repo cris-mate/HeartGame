@@ -148,7 +148,7 @@ public class LoginController {
                 googleUser = new User(
                         username,
                         googleUser.getEmail(),
-                        googleUser.getDisplayName(),
+                        googleUser.getUsername(),
                         googleUser.getOauthProvider(),
                         googleUser.getOauthId()
                 );
