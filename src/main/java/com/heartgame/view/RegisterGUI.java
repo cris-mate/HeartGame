@@ -35,7 +35,7 @@ public class RegisterGUI extends JFrame {
     public RegisterGUI() {
         super("Register - HeartGame");
         setSize(400, 450);
-        setLocation(450, 200);
+        setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         JPanel panel = new JPanel();

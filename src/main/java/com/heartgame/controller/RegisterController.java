@@ -78,8 +78,8 @@ public class RegisterController {
             return;
         }
 
-        // Create new user
-        User newUser = new User(username);
+        // Create new user with username as display name
+        User newUser = new User(username, email, username, "password", null);
 
         registerView.disableForm();
 
@@ -145,8 +145,7 @@ public class RegisterController {
     }
 
     /**
-     * Navigates back to the login screen
-     * Closes the registration window and opens the login window
+     * Closes the registration screen and navigates to the login screen
      */
     private void navigateToLogin() {
         registerView.dispose();

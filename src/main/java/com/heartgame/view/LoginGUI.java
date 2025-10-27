@@ -31,7 +31,7 @@ public class LoginGUI extends JFrame {
     public LoginGUI() {
         super("Login - HeartGame");
         setSize(400, 450);
-        setLocation(450, 200);
+        setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         JPanel panel = new JPanel();
@@ -65,6 +65,7 @@ public class LoginGUI extends JFrame {
         newUserLabel.setForeground(Color.DARK_GRAY);
 
         registerButton.setBounds(130, 290, 140, 30);
+        registerButton.setFont(new Font("Arial", Font.PLAIN, 14));
         registerButton.setBackground(new Color(108, 117, 125)); // Gray
         registerButton.setFocusPainted(false);
         registerButton.addActionListener(e -> openRegisterWindow());
@@ -77,6 +78,7 @@ public class LoginGUI extends JFrame {
 
         // Google OAuth button
         googleLoginButton.setBounds(100, 350, 200, 30);
+        googleLoginButton.setFont(new Font("Arial", Font.PLAIN, 14));
         googleLoginButton.setBackground(new Color(66, 133, 244)); // Google blue
         googleLoginButton.setFocusPainted(false);
 
