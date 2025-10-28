@@ -37,7 +37,6 @@ public class GameController implements GameTimer.TimerUpdateListener {
      * Constructs a new GameController
      * Initializes services, links the controller to the view,
      * loads the first question and publishes the GAME_STARTED event
-     *
      * @param gameView The game view it controls
      * @param user     The logged-in user
      */
@@ -75,7 +74,6 @@ public class GameController implements GameTimer.TimerUpdateListener {
     /**
      * Called by GameTimer every second as countdown progresses
      * Updates the view with remaining time and warning state
-     *
      * @param remainingSeconds Time remaining in seconds
      */
     @Override
@@ -139,7 +137,6 @@ public class GameController implements GameTimer.TimerUpdateListener {
 
     /**
      * Handles API errors by publishing an event and showing error to user
-     *
      * @param errorMessage The error message to display
      */
     private void handleApiError(String errorMessage) {
@@ -151,7 +148,6 @@ public class GameController implements GameTimer.TimerUpdateListener {
      * Handles the user's answer submission
      * Checks the solution and publishes either a CORRECT_ANSWER_SUBMITTED
      * or INCORRECT_ANSWER_SUBMITTED event with the relevant score data
-     *
      * @param e The ActionEvent triggered by the user's button click
      */
     public void handleAnswer(ActionEvent e) {

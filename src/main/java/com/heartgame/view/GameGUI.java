@@ -33,7 +33,6 @@ public class GameGUI extends JFrame implements GameEventListener {
 
     // Store current game state for display
     private int currentScore = 0;
-    private int remainingTime = 60;
 
     /**
      * Constructs the main game GUI, initializes all UI components,
@@ -66,13 +65,17 @@ public class GameGUI extends JFrame implements GameEventListener {
         topPanel.add(userPanel, BorderLayout.WEST);
 
         // Control buttons (right side)
-        JPanel controlButtonsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JPanel controlButtonsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
 
         // Start New Game button
         JButton startNewGameButton = new JButton("Start New Game");
         startNewGameButton.setFocusPainted(false);
         startNewGameButton.setFont(new Font("Arial", Font.BOLD, 14));
-        startNewGameButton.setPreferredSize(new Dimension(150, 50));
+        //startNewGameButton.setPreferredSize(new Dimension(150, 50));
+        startNewGameButton.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(34, 139, 34), 1),
+                BorderFactory.createEmptyBorder(5, 10, 5, 10)
+        ));
         startNewGameButton.addActionListener(e -> handleStartNewGame());
         controlButtonsPanel.add(startNewGameButton);
 
@@ -315,7 +318,6 @@ public class GameGUI extends JFrame implements GameEventListener {
      * @param secondsRemaining The number of seconds remaining
      */
     public void updateTimer(int secondsRemaining) {
-        this.remainingTime = secondsRemaining;
         timerLabel.setText("Time: " + secondsRemaining + "s");
         // Change to warning color in last 10 seconds
         if (secondsRemaining <= 10) {
