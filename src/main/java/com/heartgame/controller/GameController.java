@@ -88,8 +88,42 @@ public class GameController implements GameTimer.TimerUpdateListener {
      */
     @Override
     public void onTimerExpired() {
-        logger.info("Timer expired - game over");
+        logger.info("Time expired - game over");
         endGame();
+    }
+
+    /**
+     * Pauses the game
+     * Stops timer, disables buttons, and shows pause overlay
+     */
+    public void pauseGame() {
+        if (isGameActive && !gameTimer.isPaused()) {
+            gameTimer.pauseTimer();
+            gameView.showPauseOverlay();
+            gameView.disableSolutionButtons();
+            logger.debug("Game paused");
+        }
+    }
+
+    /**
+     * Resumes the game
+     * Restarts timer, enables buttons, and shows current question
+     */
+    public void resumeGame() {
+        if (isGameActive && gameTimer.isPaused()) {
+            gameTimer.resumeTimer();
+            gameView.hidePauseOverlay();
+            gameView.enableSolutionButtons();
+            logger.debug("Game resumed");
+        }
+    }
+
+    /**
+     * Checks if game is currently paused
+     * @return True if game is paused
+     */
+    public boolean isPaused() {
+        return gameTimer.isPaused();
     }
 
     /**

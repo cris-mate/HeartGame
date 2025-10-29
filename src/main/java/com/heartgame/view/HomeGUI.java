@@ -44,7 +44,7 @@ public class HomeGUI extends JFrame {
         topPanel.setBackground(new Color(248, 249, 250));
         topPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
 
-        JLabel userLabel = new JLabel("Playing as: " + user.getUsername());
+        JLabel userLabel = new JLabel("Logged in as: " + user.getUsername());
         userLabel.setFont(new Font("Arial", Font.BOLD, 18));
         userLabel.setForeground(new Color(0, 123, 255)); // Blue
         topPanel.add(userLabel);
@@ -79,7 +79,7 @@ public class HomeGUI extends JFrame {
                 "You'll be presented with images containing various numbers of hearts and" +
                 " your task is to identify and select the correct count.\n\n" +
                 "HOW TO PLAY\n" +
-                "1. Click \"Start Game\" to begin a new game session of 60 seconds\n" +
+                "1. Click \"Start Game\" button to begin a new game session of 60 seconds\n" +
                 "2. Try to answer as many questions correctly as you can before time runs out!\n" +
                 "3. Each question shows an image with hearts scattered across it\n" +
                 "4. Count the hearts carefully and click the corresponding number button (0-9)\n" +

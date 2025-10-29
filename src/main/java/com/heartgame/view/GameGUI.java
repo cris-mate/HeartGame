@@ -16,7 +16,7 @@ import java.io.Serial;
  * The main view for the game screen
  * Reacts to events updating the UI
  * Uses UserSession for accessing current user information
- * Includes logout functionality
+ * Includes pause/resume and stop game functionality
  */
 public class GameGUI extends JFrame implements GameEventListener {
 
@@ -31,8 +31,14 @@ public class GameGUI extends JFrame implements GameEventListener {
     private final User user;
     private final GameController controller;
 
+    // Control buttons
+    private final JButton startNewGameButton = new JButton("Start New Game");
+    private final JButton pauseResumeButton = new JButton("Pause Game");
+    private final JButton stopGameButton = new JButton("Stop Playing");
+
     // Store current game state for display
     private int currentScore = 0;
+    private BufferedImage currentQuestionImage = null;
 
     /**
      * Constructs the main game GUI, initializes all UI components,
@@ -52,42 +58,96 @@ public class GameGUI extends JFrame implements GameEventListener {
         mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         // ========== TOP PANEL: User Info + Control Buttons ==========
-
         JPanel topPanel = new JPanel(new BorderLayout());
         topPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 
         // User info (left side)
         JPanel userPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JLabel userLabel = new JLabel("Playing as: " + user.getUsername());
-        userLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        userLabel.setFont(new Font("Arial", Font.BOLD, 16));
         userLabel.setForeground(new Color(0, 123, 255)); // Blue
         userPanel.add(userLabel);
         topPanel.add(userPanel, BorderLayout.WEST);
 
         // Control buttons (right side)
-        JPanel controlButtonsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
+        JPanel controlPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
 
         // Start New Game button
         JButton startNewGameButton = new JButton("Start New Game");
         startNewGameButton.setFocusPainted(false);
         startNewGameButton.setFont(new Font("Arial", Font.BOLD, 14));
-        //startNewGameButton.setPreferredSize(new Dimension(150, 50));
+        startNewGameButton.setPreferredSize(new Dimension(150, 45));
         startNewGameButton.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(34, 139, 34), 1),
-                BorderFactory.createEmptyBorder(5, 10, 5, 10)
+                BorderFactory.createLineBorder(Color.LIGHT_GRAY, 2),
+                BorderFactory.createEmptyBorder(8, 12, 8, 12)
         ));
+        startNewGameButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        startNewGameButton.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                if (startNewGameButton.isEnabled()) {
+                    startNewGameButton.setBackground(new Color(33, 136, 56));
+                }
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                if (startNewGameButton.isEnabled()) {
+                    startNewGameButton.setBackground(new Color(40, 167, 69));
+                }
+            }
+        });
         startNewGameButton.addActionListener(e -> handleStartNewGame());
-        controlButtonsPanel.add(startNewGameButton);
+        controlPanel.add(startNewGameButton);
 
-        // Logout button
-        JButton logoutButton = new JButton("Logout");
-        logoutButton.setFocusPainted(false);
-        logoutButton.setFont(new Font("Arial", Font.BOLD, 14));
-        logoutButton.setPreferredSize(new Dimension(100, 50));
-        logoutButton.addActionListener(e -> handleLogout());
-        controlButtonsPanel.add(logoutButton);
+        // Pause/Resume button
+        pauseResumeButton.setBackground(new Color(255, 193, 7));
+        pauseResumeButton.setFocusPainted(false);
+        pauseResumeButton.setFont(new Font("Arial", Font.BOLD, 14));
+        pauseResumeButton.setPreferredSize(new Dimension(150, 45));
+        pauseResumeButton.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(Color.LIGHT_GRAY, 2),
+                BorderFactory.createEmptyBorder(8, 12, 8, 12)
+        ));
+        pauseResumeButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        pauseResumeButton.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                if (pauseResumeButton.isEnabled()) {
+                    pauseResumeButton.setBackground(new Color(230, 170, 0));
+                }
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                if (pauseResumeButton.isEnabled()) {
+                    pauseResumeButton.setBackground(new Color(255, 193, 7));
+                }
+            }
+        });
+        pauseResumeButton.addActionListener(e -> handlePauseResume());
+        controlPanel.add(pauseResumeButton);
 
-        topPanel.add(controlButtonsPanel, BorderLayout.EAST);
+        // Stop Playing button
+        stopGameButton.setBackground(new Color(220, 53, 69));
+        stopGameButton.setFocusPainted(false);
+        stopGameButton.setFont(new Font("Arial", Font.BOLD, 14));
+        stopGameButton.setPreferredSize(new Dimension(150, 45));
+        stopGameButton.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(Color.LIGHT_GRAY, 2),
+                BorderFactory.createEmptyBorder(8, 12, 8, 12)
+        ));
+        stopGameButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        stopGameButton.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                if (stopGameButton.isEnabled()) {
+                    stopGameButton.setBackground(new Color(180, 35, 50));
+                }
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                if (stopGameButton.isEnabled()) {
+                    stopGameButton.setBackground(new Color(220, 53, 69));
+                }
+            }
+        });
+        stopGameButton.addActionListener(e -> handleStopGame());
+        controlPanel.add(stopGameButton);
+
+        topPanel.add(controlPanel, BorderLayout.EAST);
 
         mainPanel.add(topPanel, BorderLayout.NORTH);
 
@@ -120,17 +180,17 @@ public class GameGUI extends JFrame implements GameEventListener {
         // Timer and Score panel
         JPanel infoPanel = new JPanel(new BorderLayout());
         infoPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        infoPanel.setForeground(new Color(0, 123, 255));
 
         // Timer (left side)
         JPanel timerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         timerLabel.setFont(new Font("Arial", Font.BOLD, 20));
-        timerLabel.setForeground(Color.BLUE);
         timerPanel.add(timerLabel);
 
         // Score (right side)
         JPanel scorePanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         scoreLabel.setFont(new Font("Arial", Font.BOLD, 20));
-        timerLabel.setForeground(Color.BLUE);
+        timerLabel.setForeground(new Color(0, 123, 255));
         scorePanel.add(scoreLabel);
 
         infoPanel.add(timerPanel, BorderLayout.WEST);
@@ -244,14 +304,28 @@ public class GameGUI extends JFrame implements GameEventListener {
     }
 
     /**
-     * Handles logout button
-     * Publishes logout event, cleans up, and returns to login screen
+     * Handles the Pause/Resume button
+     * Toggles between paused and playing states
      */
-    private void handleLogout() {
+    private void handlePauseResume() {
+        if (controller.isPaused()) {
+            controller.resumeGame();
+            pauseResumeButton.setText("Pause Game");
+        } else {
+            controller.pauseGame();
+            pauseResumeButton.setText("Resume Game");
+        }
+    }
+
+    /**
+     * Handles the Stop Game button
+     * Returns to home screen with confirmation
+     */
+    private void handleStopGame() {
         int confirm = JOptionPane.showConfirmDialog(
                 this,
-                "Are you sure you want to logout?\nYour current game will be lost.",
-                "Confirm Logout",
+                "Are you sure you want to stop playing?\nYour current game will be lost.",
+                "Stop Playing?",
                 JOptionPane.YES_NO_OPTION,
                 JOptionPane.WARNING_MESSAGE
         );
@@ -262,21 +336,47 @@ public class GameGUI extends JFrame implements GameEventListener {
                 controller.cleanup();
             }
 
-            // Publish logout event
-            GameEventManager.getInstance().publish(GameEventType.PLAYER_LOGGED_OUT, user);
-
             // Unsubscribe from events to prevent memory leaks
             GameEventManager.getInstance().unsubscribe(GameEventType.CORRECT_ANSWER_SUBMITTED, this);
             GameEventManager.getInstance().unsubscribe(GameEventType.INCORRECT_ANSWER_SUBMITTED, this);
 
-            // Clear user session
-            UserSession.getInstance().logout();
-
             // Close this window
             this.dispose();
 
-            // Reopen login window
-            SwingUtilities.invokeLater(() -> new LoginGUI().setVisible(true));
+            // Return to home screen
+            SwingUtilities.invokeLater(() -> new HomeGUI(user).setVisible(true));
+        }
+    }
+
+    /**
+     * Shows a pause overlay message in the quest area
+     */
+    public void showPauseOverlay() {
+        // Store current question image
+        if (questArea.getIcon() != null) {
+            currentQuestionImage = (BufferedImage) ((ImageIcon) questArea.getIcon()).getImage();
+        }
+
+        // Create pause message
+        String pauseMessage = "<html><div style='text-align: center;'>" +
+                "<h1 style='color: #0066cc; font-size: 32px; margin: 20px;'>Game is paused</h1>" +
+                "<p style='font-size: 18px; color: #666; margin: 10px;'>Current Score: " + currentScore + "</p>" +
+                "<p style='font-size: 16px; color: #999; margin: 20px;'>Click 'Resume Game' to continue</p>" +
+                "</div></html>";
+
+        questArea.setIcon(null);
+        questArea.setText(pauseMessage);
+        questArea.setHorizontalAlignment(SwingConstants.CENTER);
+        questArea.setVerticalAlignment(SwingConstants.CENTER);
+    }
+
+    /**
+     * Hides the pause overlay and restores the current question
+     */
+    public void hidePauseOverlay() {
+        questArea.setText("");
+        if (currentQuestionImage != null) {
+            questArea.setIcon(new ImageIcon(currentQuestionImage));
         }
     }
 
@@ -428,8 +528,16 @@ public class GameGUI extends JFrame implements GameEventListener {
             this.dispose();
             SwingUtilities.invokeLater(() -> new GameGUI(user).setVisible(true));
         } else {
-            // Return to login
-            handleLogout();
+            // Return to HomeGUI screen
+            if (controller != null) {
+                controller.cleanup();
+            }
+
+            GameEventManager.getInstance().unsubscribe(GameEventType.CORRECT_ANSWER_SUBMITTED, this);
+            GameEventManager.getInstance().unsubscribe(GameEventType.INCORRECT_ANSWER_SUBMITTED, this);
+
+            this.dispose();
+            SwingUtilities.invokeLater(() -> new HomeGUI(user).setVisible(true));
         }
     }
 
