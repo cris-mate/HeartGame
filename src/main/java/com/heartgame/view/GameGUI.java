@@ -72,7 +72,6 @@ public class GameGUI extends JFrame implements GameEventListener {
         JPanel controlPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
 
         // Start New Game button
-        JButton startNewGameButton = new JButton("Start New Game");
         startNewGameButton.setFocusPainted(false);
         startNewGameButton.setFont(new Font("Arial", Font.BOLD, 14));
         startNewGameButton.setPreferredSize(new Dimension(150, 45));
@@ -283,15 +282,6 @@ public class GameGUI extends JFrame implements GameEventListener {
     }
 
     /**
-     * Updates the score display - simplified method for controller access
-     * @param score The score value to display
-     */
-    public void updateScore(int score) {
-        this.currentScore = score;
-        scoreLabel.setText("Score: " + score);
-    }
-
-    /**
      * Updates the timer display
      * @param secondsRemaining The number of seconds remaining
      */
@@ -413,11 +403,10 @@ public class GameGUI extends JFrame implements GameEventListener {
     }
 
     /**
-     * Updates the question area with a new image and refreshes the score display
+     * Updates the question area with a new image
      * @param image The new question image
-     * @param score The current score
      */
-    public void updateQuestion(BufferedImage image, int score) {
+    public void updateQuestion(BufferedImage image) {
         ImageIcon ii = new ImageIcon(image);
         questArea.setIcon(ii);
     }
@@ -516,7 +505,6 @@ public class GameGUI extends JFrame implements GameEventListener {
             SwingUtilities.invokeLater(() -> new HomeGUI(user).setVisible(true));
         }
     }
-
 
     /**
      * Main entry point to launch the game GUI

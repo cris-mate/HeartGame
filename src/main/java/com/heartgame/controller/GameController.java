@@ -29,7 +29,6 @@ public class GameController implements GameTimer.TimerUpdateListener {
     private final HeartGameAPIService apiService;
     private final ScoringService scoringService;
     private final GameTimer gameTimer;
-
     private Question currentQuestion;
     private boolean isGameActive;
 
@@ -157,7 +156,7 @@ public class GameController implements GameTimer.TimerUpdateListener {
         try {
             currentQuestion = apiService.getNewQuestion();
             if (currentQuestion != null) {
-                gameView.updateQuestion(currentQuestion.getImage(), scoringService.getScore());
+                gameView.updateQuestion(currentQuestion.getImage());
                 GameEventManager.getInstance().publish(GameEventType.QUESTION_LOADED, currentQuestion);
                 logger.debug("Question loaded successfully");
             } else {

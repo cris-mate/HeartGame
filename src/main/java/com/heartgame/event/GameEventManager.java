@@ -60,6 +60,9 @@ public final class GameEventManager {
      * Publishes an event to all subscribed listeners
      * Catches exceptions from individual listeners to prevent one
      * faulty listener from breaking the entire event chain
+     * Each listener failure is logged but doesn't stop event propagation
+     * Includes protection against concurrent modification during iteration
+     *
      * @param eventType The type of event to publish
      * @param data      The data to pass to the listeners
      */
@@ -67,17 +70,33 @@ public final class GameEventManager {
         List<GameEventListener> eventListeners = listeners.get(eventType);
         if (eventListeners != null) {
             logger.debug("Publishing event: {} with {} listeners", eventType, eventListeners.size());
-            for (GameEventListener listener : eventListeners) {
+
+            int successCount = 0;
+            int failureCount = 0;
+
+            // Make a copy to avoid concurrent modification if listeners unsubscribe during iteration
+            List<GameEventListener> listenersCopy = new ArrayList<>(eventListeners);
+
+            for (GameEventListener listener : listenersCopy) {
                 try {
                     listener.onGameEvent(eventType, data);
+                    successCount++;
+                    logger.trace("Event {} successfully processed by {}",
+                            eventType, listener.getClass().getSimpleName());
                 } catch (Exception e) {
                     // Log the error but continue notifying other listeners
-                    logger.error("Error in event listener {} for event type {}: {}",
+                    failureCount++;
+                    logger.error("Event listener {} failed to process event type {}: {}",
                             listener.getClass().getSimpleName(),
                             eventType,
                             e.getMessage(),
                             e);
                 }
+            }
+
+            if (failureCount > 0) {
+                logger.warn("Event {} completed with {} successes and {} failures",
+                        eventType, successCount, failureCount);
             }
         } else {
             logger.trace("No listeners registered for event type: {}", eventType);
