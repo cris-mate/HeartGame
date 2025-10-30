@@ -1,7 +1,7 @@
 package com.heartgame.persistence;
 
 import com.heartgame.model.User;
-import org.mindrot.jbcrypt.BCrypt;
+import com.heartgame.service.AuthenticationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,6 +19,7 @@ public class UserDAO extends BaseDAO {
 
     private static final Logger logger = LoggerFactory.getLogger(UserDAO.class);
     private static final int RECENT_LOGIN_THRESHOLD_MINUTES = 5;
+    private final AuthenticationService authService = new AuthenticationService();
 
     /**
      * Finds a user by username
@@ -110,7 +111,7 @@ public class UserDAO extends BaseDAO {
                         logger.warn("User '{}' has no password (OAuth user)", username);
                         verified[0] = false;
                     } else {
-                        verified[0] = BCrypt.checkpw(password, hashedPassword);
+                        verified[0] = authService.verifyPassword(password, hashedPassword);
                     }
                 }
                 return true;
@@ -141,7 +142,7 @@ public class UserDAO extends BaseDAO {
 
                 // Hash password only for password-based users
                 if (password != null && !password.isEmpty()) {
-                    stmt.setString(2, BCrypt.hashpw(password, BCrypt.gensalt()));
+                    stmt.setString(2, authService.hashPassword(password));
                 } else {
                     stmt.setNull(2, Types.VARCHAR);
                 }
@@ -255,12 +256,4 @@ public class UserDAO extends BaseDAO {
         );
     }
 
-    /**
-     * Utility method to hash a plaintext password using BCrypt
-     * @param plainPassword The plaintext password to hash
-     * @return BCrypt hashed password string
-     */
-    public static String hashPassword(String plainPassword) {
-        return BCrypt.hashpw(plainPassword, BCrypt.gensalt());
-    }
 }

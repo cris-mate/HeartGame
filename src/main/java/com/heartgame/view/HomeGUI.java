@@ -17,7 +17,6 @@ public class HomeGUI extends JFrame {
     @Serial
     private static final long serialVersionUID = 8394756201928374650L;
 
-    private final User user;
     private final JButton startGameButton = new JButton("Start Game");
     private final JButton leaderboardButton = new JButton("Leaderboard");
     private final JButton logoutButton = new JButton("Logout");
@@ -25,11 +24,16 @@ public class HomeGUI extends JFrame {
 
     /**
      * Constructs the home GUI with user information and controls
-     * @param user The logged-in user
+     * Uses UserSession to access the current authenticated user
      */
-    public HomeGUI(User user) {
+    public HomeGUI() {
         super("Heart Game - Home");
-        this.user = user;
+
+        // Get user from session
+        User user = UserSession.getInstance().getCurrentUser();
+        if (user == null) {
+            throw new IllegalStateException("No user logged in. Cannot create HomeGUI.");
+        }
 
         setSize(860, 680);
         setLocationRelativeTo(null);
@@ -212,16 +216,6 @@ public class HomeGUI extends JFrame {
     }
 
     /**
-     * Alternative constructor using UserSession
-     */
-    public HomeGUI() {
-        this(UserSession.getInstance().getCurrentUser());
-        if (user == null) {
-            throw new IllegalStateException("No user logged in. Cannot create HomeGUI.");
-        }
-    }
-
-    /**
      * Gets the Start Game button
      * @return The start game button
      */
@@ -251,14 +245,6 @@ public class HomeGUI extends JFrame {
      */
     public JButton getExitButton() {
         return exitButton;
-    }
-
-    /**
-     * Gets the logged-in user
-     * @return The user object
-     */
-    public User getUser() {
-        return user;
     }
 
     /**

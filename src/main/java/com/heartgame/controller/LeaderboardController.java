@@ -19,17 +19,15 @@ public class LeaderboardController {
 
     private static final Logger logger = LoggerFactory.getLogger(LeaderboardController.class);
     private final LeaderboardGUI leaderboardView;
-    private final User currentUser;
     private final GameSessionDAO gameSessionDAO;
 
     /**
      * Constructs a new LeaderboardController
+     * Uses UserSession to access the current authenticated user
      * @param leaderboardView The leaderboard view it controls
-     * @param currentUser The currently logged-in user
      */
-    public LeaderboardController(LeaderboardGUI leaderboardView, User currentUser) {
+    public LeaderboardController(LeaderboardGUI leaderboardView) {
         this.leaderboardView = leaderboardView;
-        this.currentUser = currentUser;
         this.gameSessionDAO = new GameSessionDAO();
 
         initController();
@@ -43,7 +41,10 @@ public class LeaderboardController {
         leaderboardView.getRefreshButton().addActionListener(e -> loadLeaderboard());
         leaderboardView.getBackButton().addActionListener(e -> handleBack());
 
-        logger.debug("LeaderboardController initialized for user '{}'", currentUser.getUsername());
+        User currentUser = UserSession.getInstance().getCurrentUser();
+        if (currentUser != null) {
+            logger.debug("LeaderboardController initialized for user '{}'", currentUser.getUsername());
+        }
     }
 
     /**
@@ -68,8 +69,11 @@ public class LeaderboardController {
                 topScores = gameSessionDAO.getTopTenScores();
 
                 // Fetch user-specific stats
-                userHighScore = gameSessionDAO.getUserHighScore(currentUser.getId());
-                userTotalGames = gameSessionDAO.getUserGameSessions(currentUser.getId()).size();
+                User currentUser = UserSession.getInstance().getCurrentUser();
+                if (currentUser != null) {
+                    userHighScore = gameSessionDAO.getUserHighScore(currentUser.getId());
+                    userTotalGames = gameSessionDAO.getUserGameSessions(currentUser.getId()).size();
+                }
 
                 return null;
             }
@@ -108,14 +112,17 @@ public class LeaderboardController {
      * Handles the back button - returns to home screen
      */
     private void handleBack() {
-        logger.debug("User '{}' navigating back to home", currentUser.getUsername());
+        User currentUser = UserSession.getInstance().getCurrentUser();
+        if (currentUser != null) {
+            logger.debug("User '{}' navigating back to home", currentUser.getUsername());
+        }
 
         // Close leaderboard window
         leaderboardView.dispose();
 
         // Open home window
         SwingUtilities.invokeLater(() -> {
-            HomeGUI homeGUI = new HomeGUI(currentUser);
+            HomeGUI homeGUI = new HomeGUI();
             homeGUI.setVisible(true);
         });
     }

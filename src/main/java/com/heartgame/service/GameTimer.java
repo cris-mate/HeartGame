@@ -12,7 +12,7 @@ import javax.swing.Timer;
  * Timer starts when game begins and counts down from 60 seconds
  * Supports pause and resume functionality
  * Game ends when timer reaches zero
- * Publishes TIMER_EXPIRED event when time runs out
+ * Publishes TIMER_TICK and TIMER_EXPIRED events for UI updates
  */
 public class GameTimer implements GameEventListener {
 
@@ -20,33 +20,14 @@ public class GameTimer implements GameEventListener {
     private static final int TIME_LIMIT = 60;
     private int remainingTime;
     private Timer swingTimer;
-    private final TimerUpdateListener updateListener;
     private boolean isPaused = false;
-
-    /**
-     * Interface for receiving timer updates
-     */
-    public interface TimerUpdateListener {
-        /**
-         * Called every second as the timer counts down
-         * @param remainingSeconds Time remaining in seconds
-         */
-        void onTimerUpdate(int remainingSeconds);
-
-        /**
-         * Called when timer reaches zero
-         */
-        void onTimerExpired();
-    }
 
     /**
      * Constructs a new GameTimer
      * Automatically subscribes to GAME_STARTED event to begin countdown
-     * @param updateListener Listener for timer UI updates
+     * Publishes TIMER_TICK events every second and TIMER_EXPIRED when time runs out
      */
-    public GameTimer(TimerUpdateListener updateListener) {
-        this.updateListener = updateListener;
-
+    public GameTimer() {
         GameEventManager.getInstance().subscribe(GameEventType.GAME_STARTED, this);
         logger.debug("GameTimer initialized with {}s session time limit", TIME_LIMIT);
     }
@@ -81,21 +62,21 @@ public class GameTimer implements GameEventListener {
                 remainingTime--;
                 logger.trace("Timer tick: {}s remaining.", remainingTime);
 
-                // Notify UI of update
-                updateListener.onTimerUpdate(remainingTime);
+                // Publish timer tick event
+                GameEventManager.getInstance().publish(GameEventType.TIMER_TICK, remainingTime);
 
                 // Check if time expired
                 if (remainingTime <= 0) {
                     logger.info("Timer expired - game over");
                     stopTimer();
-                    updateListener.onTimerExpired();
+                    GameEventManager.getInstance().publish(GameEventType.TIMER_EXPIRED, null);
                 }
             }
         });
         swingTimer.start();
 
         // Send initial update immediately
-        updateListener.onTimerUpdate(remainingTime);
+        GameEventManager.getInstance().publish(GameEventType.TIMER_TICK, remainingTime);
     }
 
     /**
@@ -117,7 +98,7 @@ public class GameTimer implements GameEventListener {
             isPaused = false;
             logger.debug("Timer resumed from {}s remaining", remainingTime);
             // Immediately update UI when resuming
-            updateListener.onTimerUpdate(remainingTime);
+            GameEventManager.getInstance().publish(GameEventType.TIMER_TICK, remainingTime);
         }
     }
 

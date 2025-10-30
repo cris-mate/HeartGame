@@ -40,7 +40,10 @@ public class HomeController {
         homeView.getLogoutButton().addActionListener(e -> handleLogout());
         homeView.getExitButton().addActionListener(e -> handleExit());
 
-        logger.debug("HomeController initialized for user '{}'", homeView.getUser().getUsername());
+        User currentUser = UserSession.getInstance().getCurrentUser();
+        if (currentUser != null) {
+            logger.debug("HomeController initialized for user '{}'", currentUser.getUsername());
+        }
     }
 
     /**
@@ -48,7 +51,11 @@ public class HomeController {
      * Closes home view and opens game view
      */
     private void handleStartGame() {
-        User currentUser = homeView.getUser();
+        User currentUser = UserSession.getInstance().getCurrentUser();
+        if (currentUser == null) {
+            logger.error("No authenticated user found");
+            return;
+        }
         logger.info("User '{}' starting new game from home screen", currentUser.getUsername());
 
         // Close home window
@@ -56,7 +63,7 @@ public class HomeController {
 
         // Open game window
         SwingUtilities.invokeLater(() -> {
-            GameGUI gameGUI = new GameGUI(currentUser);
+            GameGUI gameGUI = new GameGUI();
             gameGUI.setVisible(true);
         });
     }
@@ -66,14 +73,18 @@ public class HomeController {
      * Closes home view and opens leaderboard view
      */
     private void handleLeaderboard() {
-        User currentUser = homeView.getUser();
+        User currentUser = UserSession.getInstance().getCurrentUser();
+        if (currentUser == null) {
+            logger.error("No authenticated user found");
+            return;
+        }
         logger.info("User '{}' viewing leaderboard from home screen", currentUser.getUsername());
 
         homeView.dispose();
 
         // Open leaderboard window
         SwingUtilities.invokeLater(() -> {
-            LeaderboardGUI leaderboardGUI = new LeaderboardGUI(currentUser);
+            LeaderboardGUI leaderboardGUI = new LeaderboardGUI();
             leaderboardGUI.setVisible(true);
         });
     }
@@ -92,11 +103,12 @@ public class HomeController {
         );
 
         if (confirm == JOptionPane.YES_OPTION) {
-            User currentUser = homeView.getUser();
-            logger.info("User '{}' logging out from home screen", currentUser.getUsername());
-
-            // Publish logout event
-            GameEventManager.getInstance().publish(GameEventType.PLAYER_LOGGED_OUT, currentUser);
+            User currentUser = UserSession.getInstance().getCurrentUser();
+            if (currentUser != null) {
+                logger.info("User '{}' logging out from home screen", currentUser.getUsername());
+                // Publish logout event
+                GameEventManager.getInstance().publish(GameEventType.PLAYER_LOGGED_OUT, currentUser);
+            }
 
             // Clear user session
             UserSession.getInstance().logout();
@@ -125,11 +137,12 @@ public class HomeController {
         );
 
         if (confirm == JOptionPane.YES_OPTION) {
-            User currentUser = homeView.getUser();
-            logger.info("User '{}' exiting application from home screen", currentUser.getUsername());
-
-            // Publish logout event before exiting
-            GameEventManager.getInstance().publish(GameEventType.PLAYER_LOGGED_OUT, currentUser);
+            User currentUser = UserSession.getInstance().getCurrentUser();
+            if (currentUser != null) {
+                logger.info("User '{}' exiting application from home screen", currentUser.getUsername());
+                // Publish logout event before exiting
+                GameEventManager.getInstance().publish(GameEventType.PLAYER_LOGGED_OUT, currentUser);
+            }
 
             UserSession.getInstance().logout();
 

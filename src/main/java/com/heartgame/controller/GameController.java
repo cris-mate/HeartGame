@@ -11,6 +11,7 @@ import com.heartgame.service.GameTimer;
 import com.heartgame.view.GameGUI;
 import com.heartgame.event.GameEventType;
 import com.heartgame.event.GameEventManager;
+import com.heartgame.event.GameEventListener;
 
 import java.awt.event.ActionEvent;
 import java.io.IOException;
@@ -22,10 +23,10 @@ import org.slf4j.LoggerFactory;
  * Controller for handling the main game logic
  * Publishes events based on user actions
  * Uses UserSession to access current user information
- * Delegates timer functionality to GameTimer service
+ * Subscribes to timer events for game timer management
  * Saves game sessions to database for leaderboard
  */
-public class GameController implements GameTimer.TimerUpdateListener {
+public class GameController implements GameEventListener {
 
     private static final Logger logger = LoggerFactory.getLogger(GameController.class);
 
@@ -44,32 +45,35 @@ public class GameController implements GameTimer.TimerUpdateListener {
      * Constructs a new GameController
      * Initializes services, links the controller to the view,
      * loads the first question and publishes the GAME_STARTED event
+     * Uses UserSession to access the current authenticated user
      * @param gameView The game view it controls
-     * @param user     The logged-in user
      */
-    public GameController(GameGUI gameView, User user) {
+    public GameController(GameGUI gameView) {
         this.gameView = gameView;
         this.apiService = new HeartGameAPIService();
         this.scoringService = new ScoringService();
-        this.gameTimer = new GameTimer(this);
+        this.gameTimer = new GameTimer();
         this.gameSessionDAO = new GameSessionDAO();
         this.isGameActive = true;
         this.gameStartTime = Instant.now();
         this.questionsAnsweredCount = 0;
 
+        // Subscribe to timer events
+        GameEventManager.getInstance().subscribe(GameEventType.TIMER_TICK, this);
+        GameEventManager.getInstance().subscribe(GameEventType.TIMER_EXPIRED, this);
+
         initController();
         loadNextGame();
 
-        // Get user from session or use passed parameter
-        User sessionUser = UserSession.getInstance().getCurrentUser();
-        User activeUser = sessionUser != null ? sessionUser : user;
-        if (activeUser == null) {
+        // Get user from session
+        User currentUser = UserSession.getInstance().getCurrentUser();
+        if (currentUser == null) {
             logger.error("No authenticated user found");
-            throw new IllegalStateException("No authenticated user");
+            throw new IllegalStateException("No authenticated user. Cannot start game.");
         }
-        logger.info("Game started for user '{}'.", activeUser.getUsername());
+        logger.info("Game started for user '{}'.", currentUser.getUsername());
         // this triggers GameTimer to start countdown
-        GameEventManager.getInstance().publish(GameEventType.GAME_STARTED, activeUser);
+        GameEventManager.getInstance().publish(GameEventType.GAME_STARTED, currentUser);
     }
 
     /**
@@ -82,29 +86,26 @@ public class GameController implements GameTimer.TimerUpdateListener {
     }
 
     /**
-     * Called by GameTimer every second as countdown progresses
-     * Updates the view with remaining time and warning state
-     * @param remainingSeconds Time remaining in seconds
+     * Handles game events including timer updates
+     * Responds to TIMER_TICK and TIMER_EXPIRED events
+     * @param eventType The type of event that occurred
+     * @param data      Event data (remainingSeconds for TIMER_TICK, null for TIMER_EXPIRED)
      */
     @Override
-    public void onTimerUpdate(int remainingSeconds) {
-        gameView.updateTimer(remainingSeconds);
-        logger.trace("Timer updated: {}s remaining.", remainingSeconds);
-    }
-
-    /**
-     * Called by GameTimer when time expires
-     * Ends the game and displays final score
-     */
-    @Override
-    public void onTimerExpired() {
-        logger.info("Time expired - game over");
-        endGame();
+    public void onGameEvent(GameEventType eventType, Object data) {
+        if (eventType == GameEventType.TIMER_TICK && data instanceof Integer) {
+            int remainingSeconds = (Integer) data;
+            gameView.updateTimer(remainingSeconds);
+            logger.trace("Timer updated: {}s remaining.", remainingSeconds);
+        } else if (eventType == GameEventType.TIMER_EXPIRED) {
+            logger.info("Time expired - game over");
+            endGame();
+        }
     }
 
     /**
      * Pauses the game
-     * Stops timer, disables buttons, and shows pause overlay
+     * Stops timer, disables buttons, shows pause overlay, and publishes GAME_PAUSED event
      */
     public void pauseGame() {
         if (isGameActive && !gameTimer.isPaused()) {
@@ -112,12 +113,13 @@ public class GameController implements GameTimer.TimerUpdateListener {
             gameView.showPauseOverlay();
             gameView.disableSolutionButtons();
             logger.debug("Game paused");
+            GameEventManager.getInstance().publish(GameEventType.GAME_PAUSED, gameTimer.getRemainingTime());
         }
     }
 
     /**
      * Resumes the game
-     * Restarts timer, enables buttons, and shows current question
+     * Restarts timer, enables buttons, shows current question, and publishes GAME_RESUMED event
      */
     public void resumeGame() {
         if (isGameActive && gameTimer.isPaused()) {
@@ -125,6 +127,7 @@ public class GameController implements GameTimer.TimerUpdateListener {
             gameView.hidePauseOverlay();
             gameView.enableSolutionButtons();
             logger.debug("Game resumed");
+            GameEventManager.getInstance().publish(GameEventType.GAME_RESUMED, gameTimer.getRemainingTime());
         }
     }
 

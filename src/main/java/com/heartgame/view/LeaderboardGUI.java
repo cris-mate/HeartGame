@@ -3,6 +3,7 @@ package com.heartgame.view;
 import com.heartgame.controller.LeaderboardController;
 import com.heartgame.model.GameSession;
 import com.heartgame.model.User;
+import com.heartgame.model.UserSession;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -22,7 +23,6 @@ public class LeaderboardGUI extends JFrame {
     @Serial
     private static final long serialVersionUID = 8273645192837465L;
 
-    private final User currentUser;
     private final JButton backButton = new JButton("Back to Home");
     private final JButton refreshButton = new JButton("Refresh");
     private final JTable leaderboardTable;
@@ -38,11 +38,10 @@ public class LeaderboardGUI extends JFrame {
 
     /**
      * Constructs the leaderboard GUI
-     * @param currentUser The currently logged-in user
+     * Uses UserSession to access the current authenticated user
      */
-    public LeaderboardGUI(User currentUser) {
+    public LeaderboardGUI() {
         super("Leaderboard - HeartGame");
-        this.currentUser = currentUser;
 
         setSize(860, 680);
         setLocationRelativeTo(null);
@@ -175,7 +174,7 @@ public class LeaderboardGUI extends JFrame {
         getContentPane().add(mainPanel);
 
         // Initialize controller
-        new LeaderboardController(this, currentUser);
+        new LeaderboardController(this);
     }
 
     /**
@@ -217,7 +216,8 @@ public class LeaderboardGUI extends JFrame {
                 String username = (String) table.getValueAt(row, 1);
 
                 // Highlight if current user
-                if (username.equals(currentUser.getUsername())) {
+                User currentUser = UserSession.getInstance().getCurrentUser();
+                if (currentUser != null && username.equals(currentUser.getUsername())) {
                     c.setBackground(new Color(255, 243, 205)); // Light yellow
                     c.setFont(c.getFont().deriveFont(Font.BOLD));
                 } else {
@@ -263,13 +263,5 @@ public class LeaderboardGUI extends JFrame {
      */
     public JButton getBackButton() {
         return backButton;
-    }
-
-    /**
-     * Gets the current user
-     * @return The current user
-     */
-    public User getCurrentUser() {
-        return currentUser;
     }
 }
