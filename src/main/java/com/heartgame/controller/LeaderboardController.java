@@ -79,7 +79,6 @@ public class LeaderboardController {
                 try {
                     // Update view with data
                     if (topScores.isEmpty()) {
-                        leaderboardView.showNoScoresMessage();
                         logger.info("No scores found in database");
                     } else {
                         leaderboardView.updateLeaderboard(topScores);

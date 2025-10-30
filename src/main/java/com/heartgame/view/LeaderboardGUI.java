@@ -27,7 +27,6 @@ public class LeaderboardGUI extends JFrame {
     private final JButton refreshButton = new JButton("Refresh");
     private final JTable leaderboardTable;
     private final DefaultTableModel tableModel;
-    private final JLabel titleLabel = new JLabel("🏆 Top 10 Leaderboard 🏆");
     private final JLabel userStatsLabel = new JLabel();
 
     // Table column names
@@ -45,7 +44,7 @@ public class LeaderboardGUI extends JFrame {
         super("Leaderboard - HeartGame");
         this.currentUser = currentUser;
 
-        setSize(700, 600);
+        setSize(860, 680);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
@@ -58,7 +57,8 @@ public class LeaderboardGUI extends JFrame {
         JPanel topPanel = new JPanel(new BorderLayout());
         topPanel.setBackground(new Color(248, 249, 250));
 
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 32));
+        JLabel titleLabel = new JLabel("Heart Game Top 10 Leaderboard");
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 28));
         titleLabel.setForeground(new Color(220, 53, 69));
         titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
         topPanel.add(titleLabel, BorderLayout.CENTER);
@@ -73,11 +73,11 @@ public class LeaderboardGUI extends JFrame {
         ));
         centerPanel.setBackground(Color.WHITE);
 
-        // Create table model (non-editable)
+        // Create table model
         tableModel = new DefaultTableModel(COLUMN_NAMES, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return false; // Make table read-only
+                return false;
             }
         };
 
@@ -86,7 +86,8 @@ public class LeaderboardGUI extends JFrame {
         leaderboardTable.setFont(new Font("Arial", Font.PLAIN, 14));
         leaderboardTable.setRowHeight(35);
         leaderboardTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        leaderboardTable.getTableHeader().setFont(new Font("Arial", Font.BOLD, 15));
+        leaderboardTable.getTableHeader().setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        leaderboardTable.getTableHeader().setFont(new Font("Arial", Font.BOLD, 16));
         leaderboardTable.getTableHeader().setBackground(new Color(0, 123, 255));
         leaderboardTable.getTableHeader().setForeground(Color.WHITE);
         leaderboardTable.setGridColor(new Color(220, 220, 220));
@@ -122,28 +123,48 @@ public class LeaderboardGUI extends JFrame {
         bottomPanel.setBackground(new Color(248, 249, 250));
 
         // Refresh button
-        refreshButton.setFont(new Font("Arial", Font.BOLD, 14));
-        refreshButton.setPreferredSize(new Dimension(120, 40));
-        refreshButton.setBackground(new Color(0, 123, 255));
-        refreshButton.setForeground(Color.WHITE);
+        refreshButton.setFont(new Font("Arial", Font.BOLD, 16));
+        refreshButton.setPreferredSize(new Dimension(160, 45));
+        refreshButton.setBackground(new Color(248, 249, 250));
+        refreshButton.setForeground(new Color(220, 53, 69));
         refreshButton.setFocusPainted(false);
         refreshButton.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(0, 86, 179), 2),
-                BorderFactory.createEmptyBorder(8, 20, 8, 20)
+                BorderFactory.createLineBorder(Color.LIGHT_GRAY, 2),
+                BorderFactory.createEmptyBorder(8, 16, 8, 16)
         ));
         refreshButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
+        // Add hover effect for Refresh button
+        refreshButton.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                refreshButton.setBackground(new Color(33, 136, 56));
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                refreshButton.setBackground(new Color(40, 167, 69));
+            }
+        });
+
         // Back button
-        backButton.setFont(new Font("Arial", Font.BOLD, 14));
-        backButton.setPreferredSize(new Dimension(140, 40));
-        backButton.setBackground(new Color(108, 117, 125));
-        backButton.setForeground(Color.WHITE);
+        backButton.setFont(new Font("Arial", Font.BOLD, 16));
+        backButton.setPreferredSize(new Dimension(160, 45));
+        backButton.setBackground(new Color(248, 249, 250));
+        backButton.setForeground(new Color(220, 53, 69));
         backButton.setFocusPainted(false);
         backButton.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(73, 80, 87), 2),
-                BorderFactory.createEmptyBorder(8, 20, 8, 20)
+                BorderFactory.createLineBorder(Color.LIGHT_GRAY, 2),
+                BorderFactory.createEmptyBorder(8, 16, 8, 16)
         ));
         backButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        // Add hover effect for Back button
+        backButton.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                backButton.setBackground(new Color(33, 136, 56));
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                backButton.setBackground(new Color(40, 167, 69));
+            }
+        });
 
         bottomPanel.add(refreshButton);
         bottomPanel.add(backButton);
@@ -226,14 +247,6 @@ public class LeaderboardGUI extends JFrame {
                 "Your Stats: High Score: %d | Games Played: %d",
                 highScore, totalGames
         ));
-    }
-
-    /**
-     * Shows a message when no scores are available
-     */
-    public void showNoScoresMessage() {
-        tableModel.setRowCount(0);
-        userStatsLabel.setText("No games played yet. Be the first to set a score!");
     }
 
     /**
