@@ -10,7 +10,8 @@ import org.slf4j.LoggerFactory;
 /**
  * Manages the subscription and publication of game events
  * Implemented as a Singleton to ensure a single event bus for the application
- * Includes error handling to prevent one faulty listener from breaking the event system
+ * Includes error handling to prevent one faulty listener from breaking the event system,
+ * concurrent modification protection and detailed error tracking
  */
 public final class GameEventManager {
 

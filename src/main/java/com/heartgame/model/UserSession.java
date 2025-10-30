@@ -10,7 +10,7 @@ import java.util.Optional;
 /**
  * Manages the current user session as a Singleton
  * Provides centralized access to the logged-in user's information throughout the application
- * Includes session validation, timestamp tracking, and utility methods
+ * Includes session validation, timestamp tracking and utility methods
  */
 public final class UserSession {
 
@@ -104,6 +104,7 @@ public final class UserSession {
 
     /**
      * Logs out the current user by clearing the session
+     * Also clears all session metadata
      */
     public void logout() {
         if (currentUser != null) {
