@@ -4,6 +4,7 @@ import com.heartgame.model.User;
 import com.heartgame.model.UserSession;
 import com.heartgame.view.HomeGUI;
 import com.heartgame.view.GameGUI;
+import com.heartgame.view.LeaderboardGUI;
 import com.heartgame.view.LoginGUI;
 import com.heartgame.event.GameEventType;
 import com.heartgame.event.GameEventManager;
@@ -14,7 +15,7 @@ import javax.swing.*;
 
 /**
  * Controller for handling home screen actions
- * Manages navigation between home, game, and login screens
+ * Manages navigation between home, game, leaderboard and login screens
  */
 public class HomeController {
 
@@ -35,6 +36,7 @@ public class HomeController {
      */
     private void initController() {
         homeView.getStartGameButton().addActionListener(e -> handleStartGame());
+        homeView.getLeaderboardButton().addActionListener(e -> handleLeaderboard());
         homeView.getLogoutButton().addActionListener(e -> handleLogout());
         homeView.getExitButton().addActionListener(e -> handleExit());
 
@@ -56,6 +58,23 @@ public class HomeController {
         SwingUtilities.invokeLater(() -> {
             GameGUI gameGUI = new GameGUI(currentUser);
             gameGUI.setVisible(true);
+        });
+    }
+
+    /**
+     * Handles the Leaderboard button
+     * Closes home view and opens leaderboard view
+     */
+    private void handleLeaderboard() {
+        User currentUser = homeView.getUser();
+        logger.info("User '{}' viewing leaderboard from home screen", currentUser.getUsername());
+
+        homeView.dispose();
+
+        // Open leaderboard window
+        SwingUtilities.invokeLater(() -> {
+            LeaderboardGUI leaderboardGUI = new LeaderboardGUI(currentUser);
+            leaderboardGUI.setVisible(true);
         });
     }
 
@@ -82,7 +101,6 @@ public class HomeController {
             // Clear user session
             UserSession.getInstance().logout();
 
-            // Close home window
             homeView.dispose();
 
             // Open login window
@@ -113,7 +131,6 @@ public class HomeController {
             // Publish logout event before exiting
             GameEventManager.getInstance().publish(GameEventType.PLAYER_LOGGED_OUT, currentUser);
 
-            // Clear user session
             UserSession.getInstance().logout();
 
             // Exit application

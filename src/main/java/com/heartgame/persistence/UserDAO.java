@@ -134,8 +134,8 @@ public class UserDAO {
             return false;
         }
 
-        String sql = "INSERT INTO users (username, password_hash, email, display_name, oauth_provider, oauth_id) " +
-                "VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO users (username, password_hash, email, oauth_provider, oauth_id) " +
+                "VALUES (?, ?, ?, ?, ?)";
 
         try (PreparedStatement stmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             stmt.setString(1, user.getUsername());
@@ -148,9 +148,8 @@ public class UserDAO {
             }
 
             stmt.setString(3, user.getEmail());
-            stmt.setString(4, user.getUsername());
-            stmt.setString(5, user.getOauthProvider());
-            stmt.setString(6, user.getOauthId());
+            stmt.setString(4, user.getOauthProvider());
+            stmt.setString(5, user.getOauthId());
 
             int rowsAffected = stmt.executeUpdate();
 

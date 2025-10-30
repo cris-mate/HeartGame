@@ -1,8 +1,10 @@
 package com.heartgame.controller;
 
+import com.heartgame.model.GameSession;
 import com.heartgame.model.Question;
 import com.heartgame.model.User;
 import com.heartgame.model.UserSession;
+import com.heartgame.persistence.GameSessionDAO;
 import com.heartgame.service.HeartGameAPIService;
 import com.heartgame.service.ScoringService;
 import com.heartgame.service.GameTimer;
@@ -12,6 +14,7 @@ import com.heartgame.event.GameEventManager;
 
 import java.awt.event.ActionEvent;
 import java.io.IOException;
+import java.time.Instant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,6 +23,7 @@ import org.slf4j.LoggerFactory;
  * Publishes events based on user actions
  * Uses UserSession to access current user information
  * Delegates timer functionality to GameTimer service
+ * Saves game sessions to database for leaderboard
  */
 public class GameController implements GameTimer.TimerUpdateListener {
 
@@ -29,8 +33,12 @@ public class GameController implements GameTimer.TimerUpdateListener {
     private final HeartGameAPIService apiService;
     private final ScoringService scoringService;
     private final GameTimer gameTimer;
+    private final GameSessionDAO gameSessionDAO;
+    private final Instant gameStartTime;
+
     private Question currentQuestion;
     private boolean isGameActive;
+    private int questionsAnsweredCount;
 
     /**
      * Constructs a new GameController
@@ -44,7 +52,10 @@ public class GameController implements GameTimer.TimerUpdateListener {
         this.apiService = new HeartGameAPIService();
         this.scoringService = new ScoringService();
         this.gameTimer = new GameTimer(this);
+        this.gameSessionDAO = new GameSessionDAO();
         this.isGameActive = true;
+        this.gameStartTime = Instant.now();
+        this.questionsAnsweredCount = 0;
 
         initController();
         loadNextGame();
@@ -137,11 +148,50 @@ public class GameController implements GameTimer.TimerUpdateListener {
         int finalScore = scoringService.getScore();
         logger.info("Game over! Final score: {}", finalScore);
 
+        // Save game session to database
+        saveGameSession(finalScore);
+
         // Publish game ended event
         GameEventManager.getInstance().publish(GameEventType.GAME_ENDED, finalScore);
 
         // Show game over dialog
         gameView.showGameOver(finalScore);
+    }
+
+    /**
+     * Saves the game session to the database
+     * Creates a GameSession object and persists it via GameSessionDAO
+     * @param finalScore The final score achieved
+     */
+    private void saveGameSession(int finalScore) {
+        User currentUser = UserSession.getInstance().getCurrentUser();
+
+        if (currentUser == null) {
+            logger.error("Cannot save game session: no user logged in");
+            return;
+        }
+
+        try {
+            GameSession session = new GameSession(
+                    currentUser.getId(),
+                    gameStartTime,
+                    Instant.now(),
+                    finalScore,
+                    questionsAnsweredCount
+            );
+
+            boolean saved = gameSessionDAO.saveGameSession(session);
+
+            if (saved) {
+                logger.info("Game session saved successfully for user '{}': score={}, questions={}",
+                        currentUser.getUsername(), finalScore, questionsAnsweredCount);
+            } else {
+                logger.warn("Failed to save game session for user '{}'", currentUser.getUsername());
+            }
+
+        } catch (Exception e) {
+            logger.error("Error saving game session", e);
+        }
     }
 
     /**
@@ -181,6 +231,7 @@ public class GameController implements GameTimer.TimerUpdateListener {
      * Handles the user's answer submission
      * Checks the solution and publishes either a CORRECT_ANSWER_SUBMITTED
      * or INCORRECT_ANSWER_SUBMITTED event with the relevant score data
+     * Increments questions answered count
      * @param e The ActionEvent triggered by the user's button click
      */
     public void handleAnswer(ActionEvent e) {
@@ -191,6 +242,7 @@ public class GameController implements GameTimer.TimerUpdateListener {
         int solution = Integer.parseInt(e.getActionCommand());
         User currentUser = UserSession.getInstance().getCurrentUser();
         String username = currentUser != null ? currentUser.getUsername() : "Unknown";
+        questionsAnsweredCount++;
 
         if (solution == currentQuestion.getSolution()) {
             logger.debug("Correct answer submitted by user '{}'.", username);

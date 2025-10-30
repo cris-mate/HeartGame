@@ -19,6 +19,7 @@ public class HomeGUI extends JFrame {
 
     private final User user;
     private final JButton startGameButton = new JButton("Start Game");
+    private final JButton leaderboardButton = new JButton("Leaderboard");
     private final JButton logoutButton = new JButton("Logout");
     private final JButton exitButton = new JButton("Exit");
 
@@ -86,9 +87,9 @@ public class HomeGUI extends JFrame {
                 "5. Each correct answer adds 1 point to your score, whereas wrong answers don’t affect your score.\n\n" +
                 "TIPS FOR SUCCESS\n" +
                 "• Count systematically (left to right, top to bottom)\n" +
-                "• Don't rush - accuracy is more important than speed\n" +
-                "• Keep an eye on the timer, especially in the last 10 seconds\n" +
-                "• Stay focused and avoid distractions\n\n" +
+                "• Stay focused and avoid distractions - accuracy is more important than speed\n" +
+                "• Don't rush but keep an eye on the timer, especially in the last 10 seconds\n" +
+                "• Check the Leaderboard to see how you rank!\n\n" +
                 "READY TO PLAY?\n" +
                 "Click the \"Start Game\" button whenever you're ready. Good luck and have fun!";
 
@@ -116,7 +117,7 @@ public class HomeGUI extends JFrame {
         startGameButton.setPreferredSize(new Dimension(160, 45));
         startGameButton.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(Color.LIGHT_GRAY, 2),
-                BorderFactory.createEmptyBorder(8, 20, 8, 20)
+                BorderFactory.createEmptyBorder(8, 16, 8, 16)
         ));
         startGameButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
@@ -130,15 +131,37 @@ public class HomeGUI extends JFrame {
             }
         });
 
+        // Leaderboard button
+        leaderboardButton.setBackground(new Color(50, 50, 50));
+        leaderboardButton.setForeground(new Color(220, 53, 69));
+        leaderboardButton.setFocusPainted(false);
+        leaderboardButton.setFont(new Font("Arial", Font.BOLD, 16));
+        leaderboardButton.setPreferredSize(new Dimension(140, 45));
+        leaderboardButton.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(Color.LIGHT_GRAY, 2),
+                BorderFactory.createEmptyBorder(8, 16, 8, 16)
+        ));
+        leaderboardButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        // Add hover effect for Leaderboard button
+        leaderboardButton.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                leaderboardButton.setBackground(new Color(0, 86, 179));
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                leaderboardButton.setBackground(new Color(0, 123, 255));
+            }
+        });
+
         // Logout button
         logoutButton.setBackground(new Color(248, 249, 250));
         logoutButton.setForeground(new Color(220, 53, 69));
         logoutButton.setFocusPainted(false);
-        logoutButton.setFont(new Font("Arial", Font.BOLD, 14));
+        logoutButton.setFont(new Font("Arial", Font.BOLD, 16));
         logoutButton.setPreferredSize(new Dimension(130, 45));
         logoutButton.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(Color.LIGHT_GRAY, 2),
-                BorderFactory.createEmptyBorder(8, 20, 8, 20)
+                BorderFactory.createEmptyBorder(8, 16, 8, 16)
         ));
         logoutButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
@@ -156,11 +179,11 @@ public class HomeGUI extends JFrame {
         exitButton.setBackground(new Color(248, 249, 250));
         exitButton.setForeground(new Color(220, 53, 69));
         exitButton.setFocusPainted(false);
-        exitButton.setFont(new Font("Arial", Font.BOLD, 14));
+        exitButton.setFont(new Font("Arial", Font.BOLD, 16));
         exitButton.setPreferredSize(new Dimension(130, 45));
         exitButton.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(Color.LIGHT_GRAY, 2),
-                BorderFactory.createEmptyBorder(8, 20, 8, 20)
+                BorderFactory.createEmptyBorder(8, 16, 8, 16)
         ));
         exitButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
@@ -175,6 +198,7 @@ public class HomeGUI extends JFrame {
         });
 
         bottomPanel.add(startGameButton);
+        bottomPanel.add(leaderboardButton);
         bottomPanel.add(logoutButton);
         bottomPanel.add(exitButton);
 
@@ -203,6 +227,14 @@ public class HomeGUI extends JFrame {
      */
     public JButton getStartGameButton() {
         return startGameButton;
+    }
+
+    /**
+     * Gets the Leaderboard button
+     * @return The leaderboard button
+     */
+    public JButton getLeaderboardButton() {
+        return leaderboardButton;
     }
 
     /**
