@@ -7,37 +7,22 @@ import org.slf4j.LoggerFactory;
 
 import java.sql.*;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
 /**
  * Data Access Object for User entities
  * Handles all database operations related to users
+ * Extends BaseDAO for transaction support and error recovery
  */
-public class UserDAO {
+public class UserDAO extends BaseDAO {
 
     private static final Logger logger = LoggerFactory.getLogger(UserDAO.class);
-    private static final String NO_CONNECTION_ERROR = "Cannot query database. No connection available.";
-    private final Connection connection;
-
-    public UserDAO() {
-        this.connection = DatabaseManager.getInstance().getConnection();
-    }
-
-    /**
-     * Checks if database connection is available
-     * Logs error if connection is null
-     * @return true if connection is available, false otherwise
-     */
-    private boolean hasConnection() {
-        if (connection == null) {
-            logger.error(NO_CONNECTION_ERROR);
-            return false;
-        }
-        return true;
-    }
+    private static final int RECENT_LOGIN_THRESHOLD_MINUTES = 5;
 
     /**
      * Finds a user by username
+     * Uses retry logic for resilience
      * @param username The username to search for
      * @return Optional containing the User if found, empty otherwise
      */
@@ -46,21 +31,25 @@ public class UserDAO {
             return Optional.empty();
         }
 
-        String sql = "SELECT id, username, email, display_name, oauth_provider, oauth_id " +
+        String sql = "SELECT id, username, email, oauth_provider, oauth_id " +
                 "FROM users WHERE username = ?";
 
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setString(1, username);
-            ResultSet rs = stmt.executeQuery();
+        Optional<User>[] result = new Optional[]{Optional.empty()};
 
-            if (rs.next()) {
-                return Optional.of(mapResultSetToUser(rs));
+        executeWithRetry(() -> {
+            try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+                stmt.setString(1, username);
+                ResultSet rs = stmt.executeQuery();
+
+                if (rs.next()) {
+                    result[0] = Optional.of(mapResultSetToUser(rs));
+                    return true;
+                }
+                return true; // Not finding a user is not an error
             }
-            return Optional.empty();
-        } catch (SQLException e) {
-            logger.error("Error finding user by username: {}", username, e);
-            return Optional.empty();
-        }
+        }, 2);
+
+        return result[0];
     }
 
     /**
@@ -74,22 +63,25 @@ public class UserDAO {
             return Optional.empty();
         }
 
-        String sql = "SELECT id, username, email, display_name, oauth_provider, oauth_id " +
+        String sql = "SELECT id, username, email, oauth_provider, oauth_id, last_login " +
                 "FROM users WHERE oauth_provider = ? AND oauth_id = ?";
 
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setString(1, oauthProvider);
-            stmt.setString(2, oauthId);
-            ResultSet rs = stmt.executeQuery();
+        Optional<User>[] result = new Optional[]{Optional.empty()};
 
-            if (rs.next()) {
-                return Optional.of(mapResultSetToUser(rs));
+        executeWithRetry(() -> {
+            try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+                stmt.setString(1, oauthProvider);
+                stmt.setString(2, oauthId);
+                ResultSet rs = stmt.executeQuery();
+
+                if (rs.next()) {
+                    result[0] = Optional.of(mapResultSetToUser(rs));
+                }
+                return true;
             }
-            return Optional.empty();
-        } catch (SQLException e) {
-            logger.error("Error finding user by OAuth ID: {} - {}", oauthProvider, oauthId, e);
-            return Optional.empty();
-        }
+        }, 2);
+
+        return result[0];
     }
 
     /**
@@ -104,27 +96,33 @@ public class UserDAO {
         }
 
         String sql = "SELECT password_hash FROM users WHERE username = ?";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setString(1, username);
-            ResultSet rs = stmt.executeQuery();
 
-            if (rs.next()) {
-                String hashedPassword = rs.getString("password_hash");
-                if (hashedPassword == null) {
-                    logger.warn("User '{}' has no password (OAuth user)", username);
-                    return false;
+        boolean[] verified = new boolean[]{false};
+
+        executeWithRetry(() -> {
+            try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+                stmt.setString(1, username);
+                ResultSet rs = stmt.executeQuery();
+
+                if (rs.next()) {
+                    String hashedPassword = rs.getString("password_hash");
+                    if (hashedPassword == null) {
+                        logger.warn("User '{}' has no password (OAuth user)", username);
+                        verified[0] = false;
+                    } else {
+                        verified[0] = BCrypt.checkpw(password, hashedPassword);
+                    }
                 }
-                return BCrypt.checkpw(password, hashedPassword);
+                return true;
             }
-            return false;
-        } catch (SQLException e) {
-            logger.error("Error verifying password for user '{}'", username, e);
-            return false;
-        }
+        }, 2);
+
+        return verified[0];
     }
 
     /**
      * Creates a new user in the database
+     * Uses transaction to ensure atomicity
      * @param user The user to create
      * @param password The plaintext password (null for OAuth users)
      * @return True if creation succeeded, false otherwise
@@ -137,40 +135,41 @@ public class UserDAO {
         String sql = "INSERT INTO users (username, password_hash, email, oauth_provider, oauth_id) " +
                 "VALUES (?, ?, ?, ?, ?)";
 
-        try (PreparedStatement stmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            stmt.setString(1, user.getUsername());
+        return executeInTransaction(() -> {
+            try (PreparedStatement stmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+                stmt.setString(1, user.getUsername());
 
-            // Hash password only for password-based users
-            if (password != null && !password.isEmpty()) {
-                stmt.setString(2, BCrypt.hashpw(password, BCrypt.gensalt()));
-            } else {
-                stmt.setNull(2, Types.VARCHAR);
-            }
-
-            stmt.setString(3, user.getEmail());
-            stmt.setString(4, user.getOauthProvider());
-            stmt.setString(5, user.getOauthId());
-
-            int rowsAffected = stmt.executeUpdate();
-
-            if (rowsAffected > 0) {
-                // Retrieve generated ID
-                ResultSet generatedKeys = stmt.getGeneratedKeys();
-                if (generatedKeys.next()) {
-                    user.setId(generatedKeys.getInt(1));
+                // Hash password only for password-based users
+                if (password != null && !password.isEmpty()) {
+                    stmt.setString(2, BCrypt.hashpw(password, BCrypt.gensalt()));
+                } else {
+                    stmt.setNull(2, Types.VARCHAR);
                 }
-                logger.info("User '{}' created successfully", user.getUsername());
-                return true;
+
+                stmt.setString(3, user.getEmail());
+                stmt.setString(4, user.getOauthProvider());
+                stmt.setString(5, user.getOauthId());
+
+                int rowsAffected = stmt.executeUpdate();
+
+                if (rowsAffected > 0) {
+                    // Retrieve generated ID
+                    ResultSet generatedKeys = stmt.getGeneratedKeys();
+                    if (generatedKeys.next()) {
+                        user.setId(generatedKeys.getInt(1));
+                    }
+                    logger.info("User '{}' created successfully", user.getUsername());
+                    return true;
+                }
+                return false;
             }
-            return false;
-        } catch (SQLException e) {
-            logger.error("Error creating user '{}'", user.getUsername(), e);
-            return false;
-        }
+        });
     }
 
     /**
      * Updates the last_login timestamp for a user
+     * Keeps original signature for backward compatibility
+     * Also checks for potential multi-session scenario
      * @param username The username
      */
     public void updateLastLogin(String username) {
@@ -178,15 +177,56 @@ public class UserDAO {
             return;
         }
 
-        String sql = "UPDATE users SET last_login = ? WHERE username = ?";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setTimestamp(1, Timestamp.from(Instant.now()));
-            stmt.setString(2, username);
-            stmt.executeUpdate();
-            logger.debug("Updated last_login for user '{}'", username);
-        } catch (SQLException e) {
-            logger.error("Failed to update last_login for user '{}'", username, e);
+        // First, check if there's a recent login (multi-session detection)
+        boolean recentLoginDetected = checkForRecentLogin(username);
+
+        if (recentLoginDetected) {
+            logger.warn("Multi-session detected: User '{}' logged in within the last {} minutes",
+                    username, RECENT_LOGIN_THRESHOLD_MINUTES);
         }
+
+        // Update last_login timestamp
+        String sql = "UPDATE users SET last_login = ? WHERE username = ?";
+
+        executeWithRetry(() -> {
+            try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+                stmt.setTimestamp(1, Timestamp.from(Instant.now()));
+                stmt.setString(2, username);
+                stmt.executeUpdate();
+                logger.debug("Updated last_login for user '{}'", username);
+                return true;
+            }
+        }, 2);
+    }
+
+    /**
+     * Checks if user has logged in recently (multi-session detection)
+     * @param username The username to check
+     * @return True if user logged in within threshold, false otherwise
+     */
+    private boolean checkForRecentLogin(String username) {
+        String sql = "SELECT last_login FROM users WHERE username = ?";
+
+        boolean[] isRecent = new boolean[]{false};
+
+        executeWithRetry(() -> {
+            try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+                stmt.setString(1, username);
+                ResultSet rs = stmt.executeQuery();
+
+                if (rs.next()) {
+                    Timestamp lastLogin = rs.getTimestamp("last_login");
+                    if (lastLogin != null) {
+                        Instant lastLoginInstant = lastLogin.toInstant();
+                        Instant threshold = Instant.now().minus(RECENT_LOGIN_THRESHOLD_MINUTES, ChronoUnit.MINUTES);
+                        isRecent[0] = lastLoginInstant.isAfter(threshold);
+                    }
+                }
+                return true;
+            }
+        }, 1);
+
+        return isRecent[0];
     }
 
     /**
@@ -210,7 +250,6 @@ public class UserDAO {
                 rs.getInt("id"),
                 rs.getString("username"),
                 rs.getString("email"),
-                rs.getString("display_name"),
                 rs.getString("oauth_provider"),
                 rs.getString("oauth_id")
         );

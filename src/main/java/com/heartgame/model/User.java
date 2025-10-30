@@ -9,7 +9,6 @@ public class User {
     private int id;
     private final String username;
     private String email;
-    private String displayName;
     private final String oauthProvider;
     private String oauthId;
 
@@ -26,14 +25,12 @@ public class User {
      * Constructs a new User with full OAuth details
      * @param username The user's name
      * @param email The user's email
-     * @param displayName The user's display name
      * @param oauthProvider The OAuth provider (e.g., "google")
      * @param oauthId The OAuth provider's user ID
      */
-    public User(String username, String email, String displayName, String oauthProvider, String oauthId) {
+    public User(String username, String email, String oauthProvider, String oauthId) {
         this.username = username;
         this.email = email;
-        this.displayName = displayName;
         this.oauthProvider = oauthProvider;
         this.oauthId = oauthId;
     }
@@ -43,15 +40,13 @@ public class User {
      * @param id Database primary key
      * @param username The user's name
      * @param email The user's email
-     * @param displayName The user's display name
      * @param oauthProvider The OAuth provider
      * @param oauthId The OAuth provider's user ID
      */
-    public User(int id, String username, String email, String displayName, String oauthProvider, String oauthId) {
+    public User(int id, String username, String email, String oauthProvider, String oauthId) {
         this.id = id;
         this.username = username;
         this.email = email;
-        this.displayName = displayName;
         this.oauthProvider = oauthProvider;
         this.oauthId = oauthId;
     }

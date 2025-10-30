@@ -79,7 +79,7 @@ public class RegisterController {
         }
 
         // Create new user with username as display name
-        User newUser = new User(username, email, username, "password", null);
+        User newUser = new User(username, email, "password", null);
 
         registerView.disableForm();
 

@@ -311,7 +311,7 @@ public class GoogleAuthService {
 
                 logger.info("Successfully fetched user info for: {}", username);
 
-                return new User(username, email, name, "google", googleId);
+                return new User(username, email, "google", googleId);
             } else {
                 logger.error("Failed to fetch user info. Response code: {}", responseCode);
                 return null;
