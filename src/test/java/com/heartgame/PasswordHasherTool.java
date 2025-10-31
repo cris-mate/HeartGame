@@ -1,14 +1,17 @@
 package com.heartgame;
 
-import com.heartgame.persistence.UserDAO;
+import com.heartgame.service.AuthenticationService;
 import java.util.Scanner;
 
 /**
  * Interactive tool for generating BCrypt password hashes
+ * Uses AuthenticationService for password hashing operations
  */
 public class PasswordHasherTool {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
+        AuthenticationService authService = new AuthenticationService();
+
         System.out.println("=== BCrypt Password Hasher ===\n");
 
         while (true) {
@@ -21,13 +24,13 @@ public class PasswordHasherTool {
             }
 
             if (input.isEmpty()) {
-                System.out.println("⚠️  Password cannot be empty!\n");
+                System.out.println("️  Password cannot be empty!\n");
                 continue;
             }
 
-            String hash = UserDAO.hashPassword(input);
+            String hash = authService.hashPassword(input);
 
-            System.out.println("\n✅ Hash generated successfully!");
+            System.out.println("\n Hash generated successfully!");
             System.out.println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
             System.out.println("Plaintext: " + input);
             System.out.println("BCrypt:    " + hash);
@@ -35,7 +38,7 @@ public class PasswordHasherTool {
 
             System.out.println("SQL INSERT example:");
             System.out.println("INSERT INTO users (username, password_hash, oauth_provider) VALUES");
-            System.out.println("('myuser', '" + hash + "', 'password');\n");
+            System.out.println("('currentUser', '" + hash + "', 'password');\n");
         }
 
         scanner.close();

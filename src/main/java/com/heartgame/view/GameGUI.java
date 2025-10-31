@@ -27,7 +27,6 @@ public class GameGUI extends JFrame implements GameEventListener {
     private final JLabel timerLabel = new JLabel("Starting Time: 60s");
     private final JLabel scoreLabel = new JLabel("Score: 0");
     private final JButton[] solutionButton = new JButton[10];
-    private final User user;
     private final GameController controller;
 
     // Control buttons
@@ -42,11 +41,16 @@ public class GameGUI extends JFrame implements GameEventListener {
     /**
      * Constructs the main game GUI, initializes all UI components,
      * and links this view to its controller
-     * @param user The logged-in user
+     * Uses UserSession to access the current authenticated user
      */
-    public GameGUI(User user) {
+    public GameGUI() {
         super("Heart Game");
-        this.user = user;
+
+        // Get user from session
+        User user = UserSession.getInstance().getCurrentUser();
+        if (user == null) {
+            throw new IllegalStateException("No user logged in. Cannot create GameGUI.");
+        }
 
         setSize(860, 680);
         setLocationRelativeTo(null);
@@ -238,18 +242,7 @@ public class GameGUI extends JFrame implements GameEventListener {
         GameEventManager.getInstance().subscribe(GameEventType.INCORRECT_ANSWER_SUBMITTED, this);
 
         // Initialize controller & start the game
-        controller = new GameController(this, user);
-    }
-
-    /**
-     * Alternative constructor using UserSession
-     * For cases where user is already in session
-     */
-    public GameGUI() {
-        this(UserSession.getInstance().getCurrentUser());
-        if (user == null) {
-            throw new IllegalStateException("No user logged in. Cannot create GameGUI.");
-        }
+        controller = new GameController(this);
     }
 
     /**
@@ -322,7 +315,7 @@ public class GameGUI extends JFrame implements GameEventListener {
             this.dispose();
 
             // Open new game window
-            SwingUtilities.invokeLater(() -> new GameGUI(user).setVisible(true));
+            SwingUtilities.invokeLater(() -> new GameGUI().setVisible(true));
         }
     }
 
@@ -366,7 +359,7 @@ public class GameGUI extends JFrame implements GameEventListener {
             this.dispose();
 
             // Return to home screen
-            SwingUtilities.invokeLater(() -> new HomeGUI(user).setVisible(true));
+            SwingUtilities.invokeLater(() -> new HomeGUI().setVisible(true));
         }
     }
 
@@ -491,7 +484,7 @@ public class GameGUI extends JFrame implements GameEventListener {
 
             // Restart the game
             this.dispose();
-            SwingUtilities.invokeLater(() -> new GameGUI(user).setVisible(true));
+            SwingUtilities.invokeLater(() -> new GameGUI().setVisible(true));
         } else {
             // Return to HomeGUI screen
             if (controller != null) {
@@ -502,7 +495,7 @@ public class GameGUI extends JFrame implements GameEventListener {
             GameEventManager.getInstance().unsubscribe(GameEventType.INCORRECT_ANSWER_SUBMITTED, this);
 
             this.dispose();
-            SwingUtilities.invokeLater(() -> new HomeGUI(user).setVisible(true));
+            SwingUtilities.invokeLater(() -> new HomeGUI().setVisible(true));
         }
     }
 

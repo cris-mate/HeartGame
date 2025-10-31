@@ -4,7 +4,7 @@ import com.heartgame.model.User;
 import com.heartgame.model.UserSession;
 import com.heartgame.persistence.UserDAO;
 import com.heartgame.service.GoogleAuthService;
-import com.heartgame.view.GameGUI;
+import com.heartgame.view.HomeGUI;
 import com.heartgame.view.LoginGUI;
 import com.heartgame.event.GameEventType;
 import com.heartgame.event.GameEventManager;
@@ -183,7 +183,7 @@ public class LoginController {
         // Close login window
         loginView.dispose();
 
-        // Open game window
-        SwingUtilities.invokeLater(() -> new GameGUI().setVisible(true));
+        // Open home window
+        SwingUtilities.invokeLater(() -> new HomeGUI().setVisible(true));
     }
 }

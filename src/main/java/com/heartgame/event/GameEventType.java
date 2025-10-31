@@ -51,5 +51,29 @@ public enum GameEventType {
      * Published when an API error occurs (network failure, parsing error, etc.)
      * Data: String (error message)
      */
-    API_ERROR
+    API_ERROR,
+
+    /**
+     * Published every second as the game timer counts down
+     * Data: Integer (remaining seconds)
+     */
+    TIMER_TICK,
+
+    /**
+     * Published when the game timer reaches zero
+     * Data: null
+     */
+    TIMER_EXPIRED,
+
+    /**
+     * Published when the game is paused
+     * Data: Integer (remaining seconds when paused)
+     */
+    GAME_PAUSED,
+
+    /**
+     * Published when the game is resumed from pause
+     * Data: Integer (remaining seconds when resumed)
+     */
+    GAME_RESUMED
 }
