@@ -4,21 +4,27 @@ import com.heartgame.controller.LeaderboardController;
 import com.heartgame.model.GameSession;
 import com.heartgame.model.User;
 import com.heartgame.model.UserSession;
+import com.heartgame.service.AvatarService;
 
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
+import javax.swing.table.TableCellRenderer;
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.Serial;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * The leaderboard view displaying top 10 scores
- * Shows rank, username, score, and date in a clean table format
+ * Shows rank, avatar, username, score, and date in a clean table format
+ * Avatars are loaded asynchronously with caching
  */
 public class LeaderboardGUI extends JFrame {
 
@@ -30,8 +36,10 @@ public class LeaderboardGUI extends JFrame {
     private final JTable leaderboardTable;
     private final DefaultTableModel tableModel;
     private final JLabel userStatsLabel = new JLabel();
+    private final Map<String, ImageIcon> avatarCache = new HashMap<>();
+    private final AvatarService avatarService = new AvatarService();
 
-    private static final String[] COLUMN_NAMES = {"Rank", "Player", "Score", "Date"};
+    private static final String[] COLUMN_NAMES = {"Rank", "Avatar", "Player", "Score", "Date"};
     private static final DateTimeFormatter DATE_FORMATTER =
             DateTimeFormatter.ofPattern("dd MMM, yyyy HH:mm").withZone(ZoneId.systemDefault());
 
@@ -42,7 +50,7 @@ public class LeaderboardGUI extends JFrame {
     public LeaderboardGUI() {
         super("Leaderboard - HeartGame");
 
-        setSize(860, 680);
+        setSize(900, 680);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
@@ -78,12 +86,20 @@ public class LeaderboardGUI extends JFrame {
             public boolean isCellEditable(int row, int column) {
                 return false;
             }
+
+            @Override
+            public Class<?> getColumnClass(int columnIndex) {
+                if (columnIndex == 1) { // Avatar column
+                    return ImageIcon.class;
+                }
+                return Object.class;
+            }
         };
 
         // Create table
         leaderboardTable = new JTable(tableModel);
         leaderboardTable.setFont(new Font("Arial", Font.PLAIN, 14));
-        leaderboardTable.setRowHeight(30);
+        leaderboardTable.setRowHeight(40); // Increased for avatars
         leaderboardTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         leaderboardTable.setGridColor(new Color(210, 210, 210));
 
@@ -103,17 +119,35 @@ public class LeaderboardGUI extends JFrame {
 
         // Set column widths
         leaderboardTable.getColumnModel().getColumn(0).setPreferredWidth(50);  // Rank
-        leaderboardTable.getColumnModel().getColumn(1).setPreferredWidth(200); // Player
-        leaderboardTable.getColumnModel().getColumn(2).setPreferredWidth(50); // Score
-        leaderboardTable.getColumnModel().getColumn(3).setPreferredWidth(200); // Date
+        leaderboardTable.getColumnModel().getColumn(1).setPreferredWidth(50);  // Avatar
+        leaderboardTable.getColumnModel().getColumn(2).setPreferredWidth(200); // Player
+        leaderboardTable.getColumnModel().getColumn(3).setPreferredWidth(80);  // Score
+        leaderboardTable.getColumnModel().getColumn(4).setPreferredWidth(200); // Date
 
         // Center align rank and score columns
         DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
         centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
         leaderboardTable.getColumnModel().getColumn(0).setCellRenderer(centerRenderer); // Rank
-        leaderboardTable.getColumnModel().getColumn(1).setCellRenderer(centerRenderer); // Player
-        leaderboardTable.getColumnModel().getColumn(2).setCellRenderer(centerRenderer); // Score
-        leaderboardTable.getColumnModel().getColumn(3).setCellRenderer(centerRenderer); // Date
+        leaderboardTable.getColumnModel().getColumn(2).setCellRenderer(centerRenderer); // Player
+        leaderboardTable.getColumnModel().getColumn(3).setCellRenderer(centerRenderer); // Score
+        leaderboardTable.getColumnModel().getColumn(4).setCellRenderer(centerRenderer); // Date
+
+        // Avatar column renderer (center-aligned)
+        leaderboardTable.getColumnModel().getColumn(1).setCellRenderer(new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value,
+                                                           boolean isSelected, boolean hasFocus,
+                                                           int row, int column) {
+                JLabel label = new JLabel();
+                label.setHorizontalAlignment(SwingConstants.CENTER);
+                if (value instanceof ImageIcon) {
+                    label.setIcon((ImageIcon) value);
+                } else {
+                    label.setText("...");
+                }
+                return label;
+            }
+        });
 
         // Add scroll pane
         JScrollPane scrollPane = new JScrollPane(leaderboardTable);
@@ -198,26 +232,98 @@ public class LeaderboardGUI extends JFrame {
 
     /**
      * Updates the leaderboard table with game session data
+     * Loads avatars asynchronously for each player
      * @param sessions List of game sessions (top 10)
      */
     public void updateLeaderboard(List<GameSession> sessions) {
         // Clear existing rows
         tableModel.setRowCount(0);
 
-        // Add new rows
+        // Add new rows with placeholder avatars
         int rank = 1;
         for (GameSession session : sessions) {
             Object[] rowData = {
                     rank++,
+                    createPlaceholderIcon(session.getUsername()), // Placeholder initially
                     session.getUsername(),
                     session.getFinalScore(),
                     DATE_FORMATTER.format(session.getEndTime())
             };
             tableModel.addRow(rowData);
+
+            // Load avatar asynchronously
+            int finalRow = rank - 2; // Current row index
+            loadAvatarAsync(session.getUsername(), finalRow);
         }
 
         // Highlight current user's rows
         highlightCurrentUser();
+    }
+
+    /**
+     * Creates a placeholder icon with the first letter of the username
+     * @param username The username
+     * @return ImageIcon with first letter
+     */
+    private ImageIcon createPlaceholderIcon(String username) {
+        BufferedImage placeholder = new BufferedImage(32, 32, BufferedImage.TYPE_INT_RGB);
+        Graphics2D g2d = placeholder.createGraphics();
+        g2d.setColor(new Color(0, 123, 255));
+        g2d.fillRect(0, 0, 32, 32);
+        g2d.setColor(Color.WHITE);
+        g2d.setFont(new Font("Arial", Font.BOLD, 16));
+        String initial = username.substring(0, 1).toUpperCase();
+        FontMetrics fm = g2d.getFontMetrics();
+        int x = (32 - fm.stringWidth(initial)) / 2;
+        int y = ((32 - fm.getHeight()) / 2) + fm.getAscent();
+        g2d.drawString(initial, x, y);
+        g2d.dispose();
+        return new ImageIcon(placeholder);
+    }
+
+    /**
+     * Loads avatar asynchronously and updates the table when complete
+     * Uses caching to avoid redundant fetches
+     * @param username The username to fetch avatar for
+     * @param row The table row to update
+     */
+    private void loadAvatarAsync(String username, int row) {
+        // Check cache first
+        if (avatarCache.containsKey(username)) {
+            tableModel.setValueAt(avatarCache.get(username), row, 1);
+            return;
+        }
+
+        SwingWorker<ImageIcon, Void> worker = new SwingWorker<>() {
+            @Override
+            protected ImageIcon doInBackground() {
+                BufferedImage avatar = avatarService.fetchAvatar(username);
+                if (avatar != null) {
+                    // Scale to table size
+                    Image scaled = avatar.getScaledInstance(32, 32, Image.SCALE_SMOOTH);
+                    return new ImageIcon(scaled);
+                }
+                return null;
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    ImageIcon icon = get();
+                    if (icon != null) {
+                        // Cache and update
+                        avatarCache.put(username, icon);
+                        if (row < tableModel.getRowCount()) {
+                            tableModel.setValueAt(icon, row, 1);
+                        }
+                    }
+                } catch (Exception e) {
+                    // Keep placeholder on error
+                }
+            }
+        };
+
+        worker.execute();
     }
 
     /**
@@ -232,7 +338,7 @@ public class LeaderboardGUI extends JFrame {
                 Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 
                 // Get username from row
-                String username = (String) table.getValueAt(row, 1);
+                String username = (String) table.getValueAt(row, 2);
 
                 // Highlight if current user
                 User currentUser = UserSession.getInstance().getCurrentUser();
@@ -244,11 +350,9 @@ public class LeaderboardGUI extends JFrame {
                     c.setFont(c.getFont().deriveFont(Font.PLAIN));
                 }
 
-                // Center align rank and score
-                if (column == 0 || column == 2) {
+                // Center align columns (except avatar)
+                if (column != 1) {
                     ((DefaultTableCellRenderer) c).setHorizontalAlignment(SwingConstants.CENTER);
-                } else {
-                    ((DefaultTableCellRenderer) c).setHorizontalAlignment(SwingConstants.LEFT);
                 }
 
                 return c;

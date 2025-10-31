@@ -17,6 +17,7 @@ import java.io.Serial;
  * The main view for the game screen
  * Reacts to events updating the UI
  * Uses UserSession for accessing current user information
+ * Uses navigation events for screen transitions
  * Includes pause/resume and stop game functionality
  */
 public class GameGUI extends JFrame implements GameEventListener {
@@ -69,7 +70,7 @@ public class GameGUI extends JFrame implements GameEventListener {
         JPanel userPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JLabel userLabel = new JLabel("Playing as: " + user.getUsername());
         userLabel.setFont(new Font("Arial", Font.PLAIN, 18));
-        userLabel.setForeground(new Color(0, 123, 255)); // Blue
+        userLabel.setForeground(new Color(0, 123, 255));
         userPanel.add(userLabel);
         topPanel.add(userPanel, BorderLayout.WEST);
 
@@ -315,7 +316,7 @@ public class GameGUI extends JFrame implements GameEventListener {
     }
 
     /**
-     * Handles the Start New Game button
+     * Handles the Start New Game button using navigation events
      * Restarts the game with a fresh session
      */
     private void handleStartNewGame() {
@@ -340,8 +341,8 @@ public class GameGUI extends JFrame implements GameEventListener {
             // Close this window
             this.dispose();
 
-            // Open new game window
-            SwingUtilities.invokeLater(() -> new GameGUI().setVisible(true));
+            // Navigate to new game using event
+            GameEventManager.getInstance().publish(GameEventType.NAVIGATE_TO_GAME, null);
         }
     }
 
@@ -360,7 +361,7 @@ public class GameGUI extends JFrame implements GameEventListener {
     }
 
     /**
-     * Handles the Stop Game button
+     * Handles the Stop Game button using navigation events
      * Returns to home screen with confirmation
      */
     private void handleStopGame() {
@@ -384,8 +385,8 @@ public class GameGUI extends JFrame implements GameEventListener {
 
             this.dispose();
 
-            // Return to home screen
-            SwingUtilities.invokeLater(() -> new HomeGUI().setVisible(true));
+            // Return to home screen using navigation event
+            GameEventManager.getInstance().publish(GameEventType.NAVIGATE_TO_HOME, null);
         }
     }
 
@@ -469,6 +470,7 @@ public class GameGUI extends JFrame implements GameEventListener {
 
     /**
      * Shows the game over message with final score
+     * Uses navigation events for screen transitions
      * @param finalScore The player's final score
      */
     public void showGameOver(int finalScore) {
@@ -508,11 +510,11 @@ public class GameGUI extends JFrame implements GameEventListener {
             GameEventManager.getInstance().unsubscribe(GameEventType.CORRECT_ANSWER_SUBMITTED, this);
             GameEventManager.getInstance().unsubscribe(GameEventType.INCORRECT_ANSWER_SUBMITTED, this);
 
-            // Restart the game
+            // Restart the game using navigation event
             this.dispose();
-            SwingUtilities.invokeLater(() -> new GameGUI().setVisible(true));
+            GameEventManager.getInstance().publish(GameEventType.NAVIGATE_TO_GAME, null);
         } else {
-            // Return to HomeGUI screen
+            // Return to HomeGUI screen using navigation event
             if (controller != null) {
                 controller.cleanup();
             }
@@ -521,7 +523,7 @@ public class GameGUI extends JFrame implements GameEventListener {
             GameEventManager.getInstance().unsubscribe(GameEventType.INCORRECT_ANSWER_SUBMITTED, this);
 
             this.dispose();
-            SwingUtilities.invokeLater(() -> new HomeGUI().setVisible(true));
+            GameEventManager.getInstance().publish(GameEventType.NAVIGATE_TO_HOME, null);
         }
     }
 

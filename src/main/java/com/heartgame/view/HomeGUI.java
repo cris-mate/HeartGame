@@ -3,15 +3,18 @@ package com.heartgame.view;
 import com.heartgame.controller.HomeController;
 import com.heartgame.model.User;
 import com.heartgame.model.UserSession;
+import com.heartgame.service.AvatarService;
 
 import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.Serial;
 
 /**
  * The home screen view displayed after successful login
  * Shows user information, game controls, and game instructions
+ * Displays user avatar fetched asynchronously
  */
 public class HomeGUI extends JFrame {
 
@@ -22,6 +25,7 @@ public class HomeGUI extends JFrame {
     private final JButton leaderboardButton = new JButton("Leaderboard");
     private final JButton logoutButton = new JButton("Logout");
     private final JButton exitButton = new JButton("Exit");
+    private final JLabel avatarLabel = new JLabel();
 
     /**
      * Constructs the home GUI with user information and controls
@@ -45,17 +49,30 @@ public class HomeGUI extends JFrame {
         mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         mainPanel.setBackground(new Color(248, 249, 250));
 
-        // ========== TOP PANEL: User Info ==========
-        JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        // ========== TOP PANEL: User Info with Avatar ==========
+        JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 5));
         topPanel.setBackground(new Color(248, 249, 250));
         topPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
 
+        // Avatar (placeholder initially)
+        avatarLabel.setPreferredSize(new Dimension(48, 48));
+        avatarLabel.setBorder(BorderFactory.createLineBorder(new Color(0, 123, 255), 2));
+        avatarLabel.setOpaque(true);
+        avatarLabel.setBackground(Color.WHITE);
+        avatarLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        avatarLabel.setText("...");
+        topPanel.add(avatarLabel);
+
+        // User info
         JLabel userLabel = new JLabel("Logged in as: " + user.getUsername());
         userLabel.setFont(new Font("Arial", Font.PLAIN, 18));
-        userLabel.setForeground(new Color(0, 123, 255)); // Blue
+        userLabel.setForeground(new Color(0, 123, 255));
         topPanel.add(userLabel);
 
         mainPanel.add(topPanel, BorderLayout.NORTH);
+
+        // Load avatar asynchronously
+        loadUserAvatar(user.getUsername());
 
         // ========== CENTER PANEL: Info and Instructions ==========
         JPanel centerPanel = new JPanel(new BorderLayout(10, 10));
@@ -125,7 +142,7 @@ public class HomeGUI extends JFrame {
                 BorderFactory.createLineBorder(controlBorder, 2, true),
                 BorderFactory.createEmptyBorder(8, 12, 8, 12));
 
-       // Start Game button
+        // Start Game button
         startGameButton.setBackground(controlBackground);
         startGameButton.setForeground(controlForeground);
         startGameButton.setFont(controlFont);
@@ -225,6 +242,44 @@ public class HomeGUI extends JFrame {
 
         // Initialize controller
         new HomeController(this);
+    }
+
+    /**
+     * Loads user avatar asynchronously
+     * Shows loading state and handles errors gracefully
+     * @param username The username to fetch avatar for
+     */
+    private void loadUserAvatar(String username) {
+        SwingWorker<BufferedImage, Void> worker = new SwingWorker<>() {
+            @Override
+            protected BufferedImage doInBackground() {
+                AvatarService avatarService = new AvatarService();
+                return avatarService.fetchAvatar(username);
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    BufferedImage avatar = get();
+                    if (avatar != null) {
+                        // Scale avatar to fit
+                        Image scaledAvatar = avatar.getScaledInstance(48, 48, Image.SCALE_SMOOTH);
+                        avatarLabel.setIcon(new ImageIcon(scaledAvatar));
+                        avatarLabel.setText(null);
+                    } else {
+                        // Fallback to initial letter
+                        avatarLabel.setText(username.substring(0, 1).toUpperCase());
+                        avatarLabel.setFont(new Font("Arial", Font.BOLD, 20));
+                    }
+                } catch (Exception e) {
+                    // Error loading avatar - use fallback
+                    avatarLabel.setText(username.substring(0, 1).toUpperCase());
+                    avatarLabel.setFont(new Font("Arial", Font.BOLD, 20));
+                }
+            }
+        };
+
+        worker.execute();
     }
 
     /**

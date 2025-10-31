@@ -1,6 +1,8 @@
 package com.heartgame.view;
 
 import com.heartgame.controller.RegisterController;
+import com.heartgame.event.GameEventManager;
+import com.heartgame.event.GameEventType;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -10,6 +12,7 @@ import java.io.Serial;
 /**
  * The view for the registration screen
  * Allows new users to create an account with username, email, and password
+ * Uses event-driven navigation (publishes NAVIGATE_TO_LOGIN event)
  */
 public class RegisterGUI extends JFrame {
 
