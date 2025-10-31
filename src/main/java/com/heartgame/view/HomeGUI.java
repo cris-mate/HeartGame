@@ -78,12 +78,12 @@ public class HomeGUI extends JFrame {
         JPanel centerPanel = new JPanel(new BorderLayout(10, 10));
         centerPanel.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(new Color(200, 200, 200), 2),
-                BorderFactory.createEmptyBorder(20, 20, 20, 20)
+                BorderFactory.createEmptyBorder(10, 20, 10, 20)
         ));
 
         // Title
         JLabel titleLabel = new JLabel("Welcome to Heart Game!");
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 28));
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
         titleLabel.setForeground(new Color(220, 53, 69));
         titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
 
