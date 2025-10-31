@@ -2,6 +2,7 @@ package com.heartgame.service;
 
 import com.heartgame.model.User;
 import com.heartgame.util.ConfigurationManager;
+import com.heartgame.util.HTTPClient;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -17,17 +18,15 @@ import java.util.Properties;
 
 /**
  * Simplified Google OAuth 2.0 authentication service
- * Uses standard Java libraries without heavy Google client dependencies
+ * Uses HTTPClient utility for all network requests (DRY principle)
  * Implements OAuth 2.0 Authorization Code Flow for desktop applications
  */
 public class GoogleAuthService {
 
     private static final Logger logger = LoggerFactory.getLogger(GoogleAuthService.class);
-    private static final int CONNECTION_TIMEOUT = 30000;
-    private static final int READ_TIMEOUT = 30000;
     private static final int CALLBACK_TIMEOUT = 120000;
 
-    // OAuth endpoints - now configurable via application.properties
+    // OAuth endpoints - configurable via application.properties
     private final String authUrl;
     private final String tokenUrl;
     private final String userinfoUrl;
@@ -184,7 +183,7 @@ public class GoogleAuthService {
                     String[] parts = requestLine.split(" ");
                     if (parts.length > 1) {
                         String path = parts[1];
-                        authCode = extractParameter(path);
+                        authCode = extractParameter(path, "code");
                     }
                 }
 
@@ -210,9 +209,10 @@ public class GoogleAuthService {
     /**
      * Extracts a parameter value from a URL query string
      * @param url The URL with query parameters
+     * @param paramName The parameter name to extract
      * @return The parameter value, or null if not found
      */
-    private String extractParameter(String url) {
+    private String extractParameter(String url, String paramName) {
         try {
             int queryStart = url.indexOf('?');
             if (queryStart == -1) return null;
@@ -222,7 +222,7 @@ public class GoogleAuthService {
 
             for (String param : params) {
                 String[] keyValue = param.split("=");
-                if (keyValue.length == 2 && keyValue[0].equals("code")) {
+                if (keyValue.length == 2 && keyValue[0].equals(paramName)) {
                     return URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8);
                 }
             }
@@ -233,21 +233,12 @@ public class GoogleAuthService {
     }
 
     /**
-     * Exchanges authorization code for access token
-     * Implements HTTP timeouts
+     * Exchanges authorization code for access token using HTTPClient
      * @param authorizationCode The authorization code from callback
      * @return Access token, or null if exchange fails
      */
     private String exchangeCodeForToken(String authorizationCode) {
         try {
-            URL url = new URL(tokenUrl);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("POST");
-            conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-            conn.setConnectTimeout(CONNECTION_TIMEOUT);
-            conn.setReadTimeout(READ_TIMEOUT);
-            conn.setDoOutput(true);
-
             // Build POST data
             Map<String, String> params = new HashMap<>();
             params.put("code", authorizationCode);
@@ -256,25 +247,12 @@ public class GoogleAuthService {
             params.put("redirect_uri", redirectUri);
             params.put("grant_type", "authorization_code");
 
-            String postData = buildPostData(params);
+            // Send POST request using HTTPClient
+            String response = HTTPClient.post(tokenUrl, params);
 
-            // Send request
-            try (OutputStream os = conn.getOutputStream()) {
-                os.write(postData.getBytes(StandardCharsets.UTF_8));
-            }
-
-            // Read response
-            int responseCode = conn.getResponseCode();
-            if (responseCode == 200) {
-                String response = readResponse(conn.getInputStream());
-                JsonObject json = JsonParser.parseString(response).getAsJsonObject();
-                return json.get("access_token").getAsString();
-            } else {
-                logger.error("Token exchange failed with code: {}", responseCode);
-                String error = readResponse(conn.getErrorStream());
-                logger.error("Error response: {}", error);
-                return null;
-            }
+            // Parse JSON response
+            JsonObject json = JsonParser.parseString(response).getAsJsonObject();
+            return json.get("access_token").getAsString();
 
         } catch (Exception e) {
             logger.error("Error exchanging code for token: {}", e.getMessage(), e);
@@ -283,39 +261,29 @@ public class GoogleAuthService {
     }
 
     /**
-     * Fetches user profile information from Google
-     * Implements HTTP timeouts
+     * Fetches user profile information from Google using HTTPClient
      * @param accessToken The OAuth access token
      * @return User object with profile data, or null if fetch fails
      */
     private User fetchUserInfo(String accessToken) {
         try {
-            URL url = new URL(userinfoUrl + "?access_token=" + URLEncoder.encode(accessToken, StandardCharsets.UTF_8));
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("GET");
-            conn.setConnectTimeout(CONNECTION_TIMEOUT);
-            conn.setReadTimeout(READ_TIMEOUT);
+            String url = userinfoUrl + "?access_token=" + URLEncoder.encode(accessToken, StandardCharsets.UTF_8);
+            String response = HTTPClient.get(url);
 
-            int responseCode = conn.getResponseCode();
-            if (responseCode == 200) {
-                String response = readResponse(conn.getInputStream());
-                JsonObject userInfo = JsonParser.parseString(response).getAsJsonObject();
+            // Parse JSON response
+            JsonObject userInfo = JsonParser.parseString(response).getAsJsonObject();
 
-                // Extract user data
-                String googleId = userInfo.get("id").getAsString();
-                String email = userInfo.has("email") ? userInfo.get("email").getAsString() : null;
-                String name = userInfo.has("name") ? userInfo.get("name").getAsString() : null;
+            // Extract user data
+            String googleId = userInfo.get("id").getAsString();
+            String email = userInfo.has("email") ? userInfo.get("email").getAsString() : null;
+            String name = userInfo.has("name") ? userInfo.get("name").getAsString() : null;
 
-                // Generate username
-                String username = generateUsername(email, name, googleId);
+            // Generate username
+            String username = generateUsername(email, name, googleId);
 
-                logger.info("Successfully fetched user info for: {}", username);
+            logger.info("Successfully fetched user info for: {}", username);
 
-                return new User(username, email, "google", googleId);
-            } else {
-                logger.error("Failed to fetch user info. Response code: {}", responseCode);
-                return null;
-            }
+            return new User(username, email, "google", googleId);
 
         } catch (Exception e) {
             logger.error("Error fetching user info: {}", e.getMessage(), e);
@@ -340,42 +308,6 @@ public class GoogleAuthService {
         } else {
             // Fallback to google ID
             return "google_user_" + googleId.substring(0, Math.min(8, googleId.length()));
-        }
-    }
-
-    /**
-     * Builds URL-encoded POST data from parameters
-     * @param params Map of parameter names to values
-     * @return URL-encoded POST data string
-     */
-    private String buildPostData(Map<String, String> params) {
-        StringBuilder postData = new StringBuilder();
-        for (Map.Entry<String, String> entry : params.entrySet()) {
-            if (!postData.isEmpty()) {
-                postData.append('&');
-            }
-            postData.append(URLEncoder.encode(entry.getKey(), StandardCharsets.UTF_8));
-            postData.append('=');
-            postData.append(URLEncoder.encode(entry.getValue(), StandardCharsets.UTF_8));
-        }
-        return postData.toString();
-    }
-
-    /**
-     * Reads full response from an input stream
-     * @param inputStream The input stream to read
-     * @return Response as a string
-     */
-    private String readResponse(InputStream inputStream) throws IOException {
-        if (inputStream == null) return "";
-
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
-            StringBuilder response = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                response.append(line);
-            }
-            return response.toString();
         }
     }
 }

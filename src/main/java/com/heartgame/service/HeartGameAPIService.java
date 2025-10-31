@@ -2,16 +2,12 @@ package com.heartgame.service;
 
 import com.heartgame.model.Question;
 import com.heartgame.util.ConfigurationManager;
+import com.heartgame.util.HTTPClient;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,13 +15,11 @@ import org.slf4j.LoggerFactory;
 /**
  * Handles communication with the external Heart Game API to fetch questions
  * Uses ConfigurationManager for externalized API URL
- * Uses SLF4J logging and implements HTTP timeouts
+ * Uses HTTPClient utility for network requests
  */
 public class HeartGameAPIService implements APIService {
 
     private static final Logger logger = LoggerFactory.getLogger(HeartGameAPIService.class);
-    private static final int CONNECTION_TIMEOUT = 30000;
-    private static final int READ_TIMEOUT = 30000;
     private final String apiUrl;
 
     /**
@@ -38,40 +32,7 @@ public class HeartGameAPIService implements APIService {
 
     @Override
     public String fetchData(String endpoint) throws IOException {
-        return readUrl(endpoint);
-    }
-
-    /**
-     * Reads the content from a given URL and returns it as a String
-     * Implements connection and read timeouts
-     * @param urlString The URL to read from
-     * @return The content of the URL as a String
-     * @throws IOException if an error occurs during network communication
-     */
-    private static String readUrl(String urlString) throws IOException {
-        URL url = new URL(urlString);
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-
-        try {
-            // Set timeouts to prevent indefinite hanging
-            connection.setConnectTimeout(CONNECTION_TIMEOUT);
-            connection.setReadTimeout(READ_TIMEOUT);
-
-            try (InputStream inputStream = connection.getInputStream();
-                 ByteArrayOutputStream result = new ByteArrayOutputStream()) {
-                byte[] buffer = new byte[1024];
-                int length;
-                while ((length = inputStream.read(buffer)) != -1) {
-                    result.write(buffer, 0, length);
-                }
-                return result.toString(StandardCharsets.UTF_8);
-            }
-        } catch (IOException e) {
-            logger.error("Error reading from URL: {} - {}", urlString, e.getMessage());
-            throw new IOException("An error occurred while reading URL: " + urlString, e);
-        } finally {
-            connection.disconnect();
-        }
+        return HTTPClient.get(endpoint);
     }
 
     /**
