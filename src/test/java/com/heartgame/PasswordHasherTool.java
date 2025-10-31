@@ -1,14 +1,17 @@
 package com.heartgame;
 
-import com.heartgame.persistence.UserDAO;
+import com.heartgame.service.AuthenticationService;
 import java.util.Scanner;
 
 /**
  * Interactive tool for generating BCrypt password hashes
+ * Uses AuthenticationService for password hashing operations
  */
 public class PasswordHasherTool {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
+        AuthenticationService authService = new AuthenticationService();
+
         System.out.println("=== BCrypt Password Hasher ===\n");
 
         while (true) {
@@ -25,7 +28,7 @@ public class PasswordHasherTool {
                 continue;
             }
 
-            String hash = UserDAO.hashPassword(input);
+            String hash = authService.hashPassword(input);
 
             System.out.println("\n✅ Hash generated successfully!");
             System.out.println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");

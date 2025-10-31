@@ -359,7 +359,7 @@ public class GameGUI extends JFrame implements GameEventListener {
             this.dispose();
 
             // Return to home screen
-            SwingUtilities.invokeLater(() -> new HomeGUI(user).setVisible(true));
+            SwingUtilities.invokeLater(() -> new HomeGUI().setVisible(true));
         }
     }
 
@@ -484,7 +484,7 @@ public class GameGUI extends JFrame implements GameEventListener {
 
             // Restart the game
             this.dispose();
-            SwingUtilities.invokeLater(() -> new GameGUI(user).setVisible(true));
+            SwingUtilities.invokeLater(() -> new GameGUI().setVisible(true));
         } else {
             // Return to HomeGUI screen
             if (controller != null) {
@@ -495,7 +495,7 @@ public class GameGUI extends JFrame implements GameEventListener {
             GameEventManager.getInstance().unsubscribe(GameEventType.INCORRECT_ANSWER_SUBMITTED, this);
 
             this.dispose();
-            SwingUtilities.invokeLater(() -> new HomeGUI(user).setVisible(true));
+            SwingUtilities.invokeLater(() -> new HomeGUI().setVisible(true));
         }
     }
 
