@@ -87,7 +87,7 @@ public class RegisterController {
             logger.info("User '{}' registered successfully", username);
             JOptionPane.showMessageDialog(
                     registerView,
-                    "Account created successfully!\nYou can now log in with your credentials.",
+                    "Account created successfully!\nYou can now login.",
                     "Registration Successful",
                     JOptionPane.INFORMATION_MESSAGE
             );

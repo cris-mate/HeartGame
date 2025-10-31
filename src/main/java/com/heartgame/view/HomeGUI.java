@@ -5,6 +5,7 @@ import com.heartgame.model.User;
 import com.heartgame.model.UserSession;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import java.awt.*;
 import java.io.Serial;
 
@@ -50,7 +51,7 @@ public class HomeGUI extends JFrame {
         topPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
 
         JLabel userLabel = new JLabel("Logged in as: " + user.getUsername());
-        userLabel.setFont(new Font("Arial", Font.BOLD, 18));
+        userLabel.setFont(new Font("Arial", Font.PLAIN, 18));
         userLabel.setForeground(new Color(0, 123, 255)); // Blue
         topPanel.add(userLabel);
 
@@ -75,7 +76,8 @@ public class HomeGUI extends JFrame {
         infoArea.setLineWrap(true);
         infoArea.setWrapStyleWord(true);
         infoArea.setFont(new Font("Arial", Font.PLAIN, 14));
-        infoArea.setBackground(Color.WHITE);
+        infoArea.setBackground(new  Color(240, 240, 240));
+        infoArea.setOpaque(true);
         infoArea.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         String infoText = "Hello, " + user.getUsername() + "!\n\n" +
@@ -113,91 +115,101 @@ public class HomeGUI extends JFrame {
         bottomPanel.setBackground(new Color(248, 249, 250));
         bottomPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
 
-        // Start Game button (Primary action)
-        startGameButton.setBackground(new Color(248, 249, 250));
-        startGameButton.setForeground(new Color(220, 53, 69));
-        startGameButton.setFocusPainted(false);
-        startGameButton.setFont(new Font("Arial", Font.BOLD, 16));
-        startGameButton.setPreferredSize(new Dimension(160, 45));
-        startGameButton.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(Color.LIGHT_GRAY, 2),
-                BorderFactory.createEmptyBorder(8, 16, 8, 16)
-        ));
-        startGameButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        // --- Control Button Styling ---
+        Color controlBackground = new Color(230, 230, 230);
+        Color controlHover = new Color(200, 200, 200);
+        Color controlForeground = new Color(0, 123, 255);
+        Color controlBorder = Color.LIGHT_GRAY;
+        Font controlFont = new Font("Arial", Font.BOLD, 16);
+        Border roundedBorder = BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(controlBorder, 2, true),
+                BorderFactory.createEmptyBorder(8, 12, 8, 12));
 
-        // Add hover effect for Start Game button
+       // Start Game button
+        startGameButton.setBackground(controlBackground);
+        startGameButton.setForeground(controlForeground);
+        startGameButton.setFont(controlFont);
+        startGameButton.setPreferredSize(new Dimension(150, 45));
+        startGameButton.setBorder(roundedBorder);
+        startGameButton.setOpaque(true);
+        startGameButton.setFocusPainted(false);
+        startGameButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
         startGameButton.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
-                startGameButton.setBackground(new Color(33, 136, 56));
+                if (startGameButton.isEnabled()) {
+                    startGameButton.setBackground(controlHover);
+                }
             }
             public void mouseExited(java.awt.event.MouseEvent evt) {
-                startGameButton.setBackground(new Color(40, 167, 69));
+                if (startGameButton.isEnabled()) {
+                    startGameButton.setBackground(controlBackground);
+                }
             }
         });
 
         // Leaderboard button
-        leaderboardButton.setBackground(new Color(50, 50, 50));
-        leaderboardButton.setForeground(new Color(220, 53, 69));
+        leaderboardButton.setBackground(controlBackground);
+        leaderboardButton.setForeground(controlForeground);
+        leaderboardButton.setFont(controlFont);
+        leaderboardButton.setPreferredSize(new Dimension(150, 45));
+        leaderboardButton.setBorder(roundedBorder);
+        leaderboardButton.setOpaque(true);
         leaderboardButton.setFocusPainted(false);
-        leaderboardButton.setFont(new Font("Arial", Font.BOLD, 16));
-        leaderboardButton.setPreferredSize(new Dimension(140, 45));
-        leaderboardButton.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(Color.LIGHT_GRAY, 2),
-                BorderFactory.createEmptyBorder(8, 16, 8, 16)
-        ));
         leaderboardButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
-        // Add hover effect for Leaderboard button
         leaderboardButton.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
-                leaderboardButton.setBackground(new Color(0, 86, 179));
+                if (leaderboardButton.isEnabled()) {
+                    leaderboardButton.setBackground(controlHover);
+                }
             }
             public void mouseExited(java.awt.event.MouseEvent evt) {
-                leaderboardButton.setBackground(new Color(0, 123, 255));
+                if (leaderboardButton.isEnabled()) {
+                    leaderboardButton.setBackground(controlBackground);
+                }
             }
         });
 
         // Logout button
-        logoutButton.setBackground(new Color(248, 249, 250));
-        logoutButton.setForeground(new Color(220, 53, 69));
+        logoutButton.setBackground(controlBackground);
+        logoutButton.setForeground(controlForeground);
+        logoutButton.setFont(controlFont);
+        logoutButton.setPreferredSize(new Dimension(150, 45));
+        logoutButton.setBorder(roundedBorder);
+        logoutButton.setOpaque(true);
         logoutButton.setFocusPainted(false);
-        logoutButton.setFont(new Font("Arial", Font.BOLD, 16));
-        logoutButton.setPreferredSize(new Dimension(130, 45));
-        logoutButton.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(Color.LIGHT_GRAY, 2),
-                BorderFactory.createEmptyBorder(8, 16, 8, 16)
-        ));
         logoutButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
-        // Add hover effect for Logout button
         logoutButton.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
-                logoutButton.setBackground(new Color(230, 170, 0));
+                if (logoutButton.isEnabled()) {
+                    logoutButton.setBackground(controlHover);
+                }
             }
             public void mouseExited(java.awt.event.MouseEvent evt) {
-                logoutButton.setBackground(new Color(255, 193, 7));
+                if (logoutButton.isEnabled()) {
+                    logoutButton.setBackground(controlBackground);
+                }
             }
         });
 
         // Exit button
-        exitButton.setBackground(new Color(248, 249, 250));
-        exitButton.setForeground(new Color(220, 53, 69));
+        exitButton.setBackground(controlBackground);
+        exitButton.setForeground(controlForeground);
+        exitButton.setFont(controlFont);
+        exitButton.setPreferredSize(new Dimension(150, 45));
+        exitButton.setBorder(roundedBorder);
+        exitButton.setOpaque(true);
         exitButton.setFocusPainted(false);
-        exitButton.setFont(new Font("Arial", Font.BOLD, 16));
-        exitButton.setPreferredSize(new Dimension(130, 45));
-        exitButton.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(Color.LIGHT_GRAY, 2),
-                BorderFactory.createEmptyBorder(8, 16, 8, 16)
-        ));
         exitButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
-        // Add hover effect for Exit button
         exitButton.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
-                exitButton.setBackground(new Color(180, 35, 50));
+                if (exitButton.isEnabled()) {
+                    exitButton.setBackground(controlHover);
+                }
             }
             public void mouseExited(java.awt.event.MouseEvent evt) {
-                exitButton.setBackground(new Color(220, 53, 69));
+                if (exitButton.isEnabled()) {
+                    exitButton.setBackground(controlBackground);
+                }
             }
         });
 

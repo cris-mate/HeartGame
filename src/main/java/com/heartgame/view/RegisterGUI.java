@@ -3,6 +3,7 @@ package com.heartgame.view;
 import com.heartgame.controller.RegisterController;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import java.awt.*;
 import java.io.Serial;
 
@@ -44,6 +45,7 @@ public class RegisterGUI extends JFrame {
         // Title
         titleLabel.setBounds(100, 20, 200, 25);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 18));
+        titleLabel.setForeground(new Color(220, 53, 69));
         titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
 
         // Username
@@ -64,12 +66,49 @@ public class RegisterGUI extends JFrame {
 
         // Register button
         registerButton.setBounds(120, 250, 160, 30);
-        registerButton.setBackground(new Color(40, 167, 69)); // Success green
+        registerButton.setBackground(new Color(230, 230, 230));
+        registerButton.setForeground(new Color(0, 123, 255));
+        Border roundedBorder = BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(Color.LIGHT_GRAY, 2, true),
+                BorderFactory.createEmptyBorder(8, 12, 8, 12)
+        );
+        registerButton.setBorder(roundedBorder);
+        registerButton.setOpaque(true);
         registerButton.setFocusPainted(false);
+        registerButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        registerButton.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                if (registerButton.isEnabled()) {
+                    registerButton.setBackground(new Color(200, 200, 200));
+                }
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                if (registerButton.isEnabled()) {
+                    registerButton.setBackground(new Color(230, 230, 230));
+                }
+            }
+        });
 
         // Back to Login button
         backToLoginButton.setBounds(120, 285, 160, 30);
+        backToLoginButton.setBackground(new Color(230, 230, 230));
+        backToLoginButton.setForeground(new Color(0, 123, 255));
+        backToLoginButton.setBorder(roundedBorder);
+        backToLoginButton.setOpaque(true);
         backToLoginButton.setFocusPainted(false);
+        backToLoginButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        backToLoginButton.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                if (backToLoginButton.isEnabled()) {
+                    backToLoginButton.setBackground(new Color(200, 200, 200));
+                }
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                if (backToLoginButton.isEnabled()) {
+                    backToLoginButton.setBackground(new Color(230, 230, 230));
+                }
+            }
+        });
 
         // Add hint text
         JLabel hintLabel = new JLabel("All fields are required");

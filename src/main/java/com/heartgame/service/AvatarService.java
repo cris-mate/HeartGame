@@ -20,8 +20,7 @@ import java.util.Base64;
 /**
  * Service for fetching user avatars from the DiceBear Avatars API
  * Demonstrates interoperability with a JSON-based REST API
- * Provides a clear contrast to the CSV-based HeartGameAPIService
- * Uses DiceBear API v7.x (https://www.dicebear.com/)
+ * Uses DiceBear API v7.x
  */
 public class AvatarService {
 

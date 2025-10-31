@@ -6,8 +6,10 @@ import com.heartgame.model.User;
 import com.heartgame.model.UserSession;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.JTableHeader;
 import java.awt.*;
 import java.io.Serial;
 import java.time.ZoneId;
@@ -29,12 +31,9 @@ public class LeaderboardGUI extends JFrame {
     private final DefaultTableModel tableModel;
     private final JLabel userStatsLabel = new JLabel();
 
-    // Table column names
     private static final String[] COLUMN_NAMES = {"Rank", "Player", "Score", "Date"};
-
-    // Date formatter for display
     private static final DateTimeFormatter DATE_FORMATTER =
-            DateTimeFormatter.ofPattern("MMM dd, yyyy HH:mm").withZone(ZoneId.systemDefault());
+            DateTimeFormatter.ofPattern("dd MMM, yyyy HH:mm").withZone(ZoneId.systemDefault());
 
     /**
      * Constructs the leaderboard GUI
@@ -48,15 +47,15 @@ public class LeaderboardGUI extends JFrame {
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
         // Main panel
-        JPanel mainPanel = new JPanel(new BorderLayout(15, 15));
-        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-        mainPanel.setBackground(new Color(248, 249, 250));
+        JPanel mainPanel = new JPanel(new BorderLayout(20, 20));
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 40, 20, 40));
+        mainPanel.setBackground(new Color(240, 240, 240));
 
         // ========== TOP PANEL: Title ==========
         JPanel topPanel = new JPanel(new BorderLayout());
-        topPanel.setBackground(new Color(248, 249, 250));
+        topPanel.setBackground(new Color(240, 240, 240));
 
-        JLabel titleLabel = new JLabel("Heart Game Top 10 Leaderboard");
+        JLabel titleLabel = new JLabel("Heart Game: Top 10 Leaderboard");
         titleLabel.setFont(new Font("Arial", Font.BOLD, 28));
         titleLabel.setForeground(new Color(220, 53, 69));
         titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
@@ -68,9 +67,10 @@ public class LeaderboardGUI extends JFrame {
         JPanel centerPanel = new JPanel(new BorderLayout(10, 10));
         centerPanel.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(new Color(200, 200, 200), 2),
-                BorderFactory.createEmptyBorder(15, 15, 15, 15)
+                BorderFactory.createEmptyBorder(20, 40, 20, 40)
         ));
         centerPanel.setBackground(Color.WHITE);
+        centerPanel.setOpaque(true);
 
         // Create table model
         tableModel = new DefaultTableModel(COLUMN_NAMES, 0) {
@@ -83,25 +83,37 @@ public class LeaderboardGUI extends JFrame {
         // Create table
         leaderboardTable = new JTable(tableModel);
         leaderboardTable.setFont(new Font("Arial", Font.PLAIN, 14));
-        leaderboardTable.setRowHeight(35);
+        leaderboardTable.setRowHeight(30);
         leaderboardTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        leaderboardTable.getTableHeader().setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-        leaderboardTable.getTableHeader().setFont(new Font("Arial", Font.BOLD, 16));
-        leaderboardTable.getTableHeader().setBackground(new Color(0, 123, 255));
-        leaderboardTable.getTableHeader().setForeground(Color.WHITE);
-        leaderboardTable.setGridColor(new Color(220, 220, 220));
+        leaderboardTable.setGridColor(new Color(210, 210, 210));
+
+        // --- Header Styling ---
+        JTableHeader header = leaderboardTable.getTableHeader();
+        header.setPreferredSize(new Dimension(header.getWidth(), 40));
+        header.setFont(new Font("Arial", Font.BOLD, 16));
+        header.setBackground(new Color(0, 123, 255));
+        header.setForeground(new Color(240, 240, 240));
+        DefaultTableCellRenderer renderer = (DefaultTableCellRenderer) header.getDefaultRenderer();
+        renderer.setHorizontalAlignment(SwingConstants.CENTER);
+        renderer.setVerticalAlignment(SwingConstants.CENTER);
+        renderer.setBorder(BorderFactory.createCompoundBorder(
+                renderer.getBorder(),
+                BorderFactory.createEmptyBorder(5, 5, 5, 5)
+        ));
 
         // Set column widths
-        leaderboardTable.getColumnModel().getColumn(0).setPreferredWidth(60);  // Rank
+        leaderboardTable.getColumnModel().getColumn(0).setPreferredWidth(50);  // Rank
         leaderboardTable.getColumnModel().getColumn(1).setPreferredWidth(200); // Player
-        leaderboardTable.getColumnModel().getColumn(2).setPreferredWidth(100); // Score
-        leaderboardTable.getColumnModel().getColumn(3).setPreferredWidth(180); // Date
+        leaderboardTable.getColumnModel().getColumn(2).setPreferredWidth(50); // Score
+        leaderboardTable.getColumnModel().getColumn(3).setPreferredWidth(200); // Date
 
         // Center align rank and score columns
         DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
         centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
         leaderboardTable.getColumnModel().getColumn(0).setCellRenderer(centerRenderer); // Rank
+        leaderboardTable.getColumnModel().getColumn(1).setCellRenderer(centerRenderer); // Player
         leaderboardTable.getColumnModel().getColumn(2).setCellRenderer(centerRenderer); // Score
+        leaderboardTable.getColumnModel().getColumn(3).setCellRenderer(centerRenderer); // Date
 
         // Add scroll pane
         JScrollPane scrollPane = new JScrollPane(leaderboardTable);
@@ -121,56 +133,63 @@ public class LeaderboardGUI extends JFrame {
         JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
         bottomPanel.setBackground(new Color(248, 249, 250));
 
-        // Refresh button
-        refreshButton.setFont(new Font("Arial", Font.BOLD, 16));
-        refreshButton.setPreferredSize(new Dimension(160, 45));
-        refreshButton.setBackground(new Color(248, 249, 250));
-        refreshButton.setForeground(new Color(220, 53, 69));
-        refreshButton.setFocusPainted(false);
-        refreshButton.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(Color.LIGHT_GRAY, 2),
-                BorderFactory.createEmptyBorder(8, 16, 8, 16)
-        ));
-        refreshButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        // --- Control Button Styling ---
+        Color controlBackground = new Color(230, 230, 230);
+        Color controlHover = new Color(200, 200, 200);
+        Color controlForeground = new Color(0, 123, 255);
+        Color controlBorder = Color.LIGHT_GRAY;
+        Font controlFont = new Font("Arial", Font.BOLD, 16);
+        Border roundedBorder = BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(controlBorder, 2, true),
+                BorderFactory.createEmptyBorder(8, 12, 8, 12));
 
-        // Add hover effect for Refresh button
+        // Refresh button
+        refreshButton.setBackground(controlBackground);
+        refreshButton.setForeground(controlForeground);
+        refreshButton.setFont(controlFont);
+        refreshButton.setPreferredSize(new Dimension(150, 45));
+        refreshButton.setBorder(roundedBorder);
+        refreshButton.setOpaque(true);
+        refreshButton.setFocusPainted(false);
+        refreshButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
         refreshButton.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
-                refreshButton.setBackground(new Color(33, 136, 56));
+                if (refreshButton.isEnabled()) {
+                    refreshButton.setBackground(controlHover);
+                }
             }
             public void mouseExited(java.awt.event.MouseEvent evt) {
-                refreshButton.setBackground(new Color(40, 167, 69));
+                if (refreshButton.isEnabled()) {
+                    refreshButton.setBackground(controlBackground);
+                }
             }
         });
 
         // Back button
-        backButton.setFont(new Font("Arial", Font.BOLD, 16));
-        backButton.setPreferredSize(new Dimension(160, 45));
-        backButton.setBackground(new Color(248, 249, 250));
-        backButton.setForeground(new Color(220, 53, 69));
+        backButton.setBackground(controlBackground);
+        backButton.setForeground(controlForeground);
+        backButton.setFont(controlFont);
+        backButton.setPreferredSize(new Dimension(150, 45));
+        backButton.setBorder(roundedBorder);
+        backButton.setOpaque(true);
         backButton.setFocusPainted(false);
-        backButton.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(Color.LIGHT_GRAY, 2),
-                BorderFactory.createEmptyBorder(8, 16, 8, 16)
-        ));
         backButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
-        // Add hover effect for Back button
         backButton.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
-                backButton.setBackground(new Color(33, 136, 56));
+                if (backButton.isEnabled()) {
+                    backButton.setBackground(controlHover);
+                }
             }
             public void mouseExited(java.awt.event.MouseEvent evt) {
-                backButton.setBackground(new Color(40, 167, 69));
+                if (backButton.isEnabled()) {
+                    backButton.setBackground(controlBackground);
+                }
             }
         });
 
         bottomPanel.add(refreshButton);
         bottomPanel.add(backButton);
-
         mainPanel.add(bottomPanel, BorderLayout.SOUTH);
-
-        // Add main panel to frame
         getContentPane().add(mainPanel);
 
         // Initialize controller

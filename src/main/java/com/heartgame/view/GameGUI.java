@@ -8,6 +8,7 @@ import com.heartgame.event.GameEventListener;
 import com.heartgame.event.GameEventManager;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
@@ -67,7 +68,7 @@ public class GameGUI extends JFrame implements GameEventListener {
         // User info (left side)
         JPanel userPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JLabel userLabel = new JLabel("Playing as: " + user.getUsername());
-        userLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        userLabel.setFont(new Font("Arial", Font.PLAIN, 18));
         userLabel.setForeground(new Color(0, 123, 255)); // Blue
         userPanel.add(userLabel);
         topPanel.add(userPanel, BorderLayout.WEST);
@@ -75,24 +76,35 @@ public class GameGUI extends JFrame implements GameEventListener {
         // Control buttons (right side)
         JPanel controlPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
 
-        // Start New Game button
-        startNewGameButton.setFocusPainted(false);
-        startNewGameButton.setFont(new Font("Arial", Font.BOLD, 14));
-        startNewGameButton.setPreferredSize(new Dimension(150, 45));
-        startNewGameButton.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(Color.LIGHT_GRAY, 2),
+        // --- Control Button Styling ---
+        Color controlBackground = new Color(230, 230, 230);
+        Color controlHover = new Color(200, 200, 200);
+        Color controlForeground = new Color(0, 123, 255);
+        Color controlBorder = Color.LIGHT_GRAY;
+        Font controlFont = new Font("Arial", Font.BOLD, 16);
+        Border roundedBorder = BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(controlBorder, 2, true),
                 BorderFactory.createEmptyBorder(8, 12, 8, 12)
-        ));
+        );
+
+        // Start New Game button
+        startNewGameButton.setBackground(controlBackground);
+        startNewGameButton.setForeground(controlForeground);
+        startNewGameButton.setFont(controlFont);
+        startNewGameButton.setPreferredSize(new Dimension(150, 45));
+        startNewGameButton.setBorder(roundedBorder);
+        startNewGameButton.setOpaque(true);
+        startNewGameButton.setFocusPainted(false);
         startNewGameButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
         startNewGameButton.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 if (startNewGameButton.isEnabled()) {
-                    startNewGameButton.setBackground(new Color(33, 136, 56));
+                    startNewGameButton.setBackground(controlHover);
                 }
             }
             public void mouseExited(java.awt.event.MouseEvent evt) {
                 if (startNewGameButton.isEnabled()) {
-                    startNewGameButton.setBackground(new Color(40, 167, 69));
+                    startNewGameButton.setBackground(controlBackground);
                 }
             }
         });
@@ -100,24 +112,23 @@ public class GameGUI extends JFrame implements GameEventListener {
         controlPanel.add(startNewGameButton);
 
         // Pause/Resume button
-        pauseResumeButton.setBackground(new Color(255, 193, 7));
-        pauseResumeButton.setFocusPainted(false);
-        pauseResumeButton.setFont(new Font("Arial", Font.BOLD, 14));
+        pauseResumeButton.setBackground(controlBackground);
+        pauseResumeButton.setForeground(controlForeground);
+        pauseResumeButton.setFont(controlFont);
         pauseResumeButton.setPreferredSize(new Dimension(150, 45));
-        pauseResumeButton.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(Color.LIGHT_GRAY, 2),
-                BorderFactory.createEmptyBorder(8, 12, 8, 12)
-        ));
+        pauseResumeButton.setBorder(roundedBorder);
+        pauseResumeButton.setOpaque(true);
+        pauseResumeButton.setFocusPainted(false);
         pauseResumeButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
         pauseResumeButton.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 if (pauseResumeButton.isEnabled()) {
-                    pauseResumeButton.setBackground(new Color(230, 170, 0));
+                    pauseResumeButton.setBackground(controlHover);
                 }
             }
             public void mouseExited(java.awt.event.MouseEvent evt) {
                 if (pauseResumeButton.isEnabled()) {
-                    pauseResumeButton.setBackground(new Color(255, 193, 7));
+                    pauseResumeButton.setBackground(controlBackground);
                 }
             }
         });
@@ -125,24 +136,23 @@ public class GameGUI extends JFrame implements GameEventListener {
         controlPanel.add(pauseResumeButton);
 
         // Stop Playing button
-        stopGameButton.setBackground(new Color(220, 53, 69));
-        stopGameButton.setFocusPainted(false);
-        stopGameButton.setFont(new Font("Arial", Font.BOLD, 14));
+        stopGameButton.setBackground(controlBackground);
+        stopGameButton.setForeground(controlForeground);
+        stopGameButton.setFont(controlFont);
         stopGameButton.setPreferredSize(new Dimension(150, 45));
-        stopGameButton.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(Color.LIGHT_GRAY, 2),
-                BorderFactory.createEmptyBorder(8, 12, 8, 12)
-        ));
+        stopGameButton.setBorder(roundedBorder);
+        stopGameButton.setOpaque(true);
+        stopGameButton.setFocusPainted(false);
         stopGameButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
         stopGameButton.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 if (stopGameButton.isEnabled()) {
-                    stopGameButton.setBackground(new Color(180, 35, 50));
+                    stopGameButton.setBackground(controlHover);
                 }
             }
             public void mouseExited(java.awt.event.MouseEvent evt) {
                 if (stopGameButton.isEnabled()) {
-                    stopGameButton.setBackground(new Color(220, 53, 69));
+                    stopGameButton.setBackground(controlBackground);
                 }
             }
         });
@@ -161,7 +171,7 @@ public class GameGUI extends JFrame implements GameEventListener {
                         "How many hearts are there?",
                         0,
                         0,
-                        new Font("Arial", Font.BOLD, 20),
+                        new Font("Arial", Font.PLAIN, 20),
                         new Color(220, 53, 69)
                 ),
                 BorderFactory.createEmptyBorder(10, 10, 10, 10)
@@ -187,12 +197,12 @@ public class GameGUI extends JFrame implements GameEventListener {
 
         // Timer (left side)
         JPanel timerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        timerLabel.setFont(new Font("Arial", Font.BOLD, 20));
+        timerLabel.setFont(new Font("Arial", Font.PLAIN, 20));
         timerPanel.add(timerLabel);
 
         // Score (right side)
         JPanel scorePanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        scoreLabel.setFont(new Font("Arial", Font.BOLD, 20));
+        scoreLabel.setFont(new Font("Arial", Font.PLAIN, 20));
         scoreLabel.setForeground(new Color(0, 123, 255));
         scorePanel.add(scoreLabel);
 
@@ -204,26 +214,42 @@ public class GameGUI extends JFrame implements GameEventListener {
         JPanel solutionButtonsPanel = new JPanel(new GridLayout(1, 10, 10, 10));
         solutionButtonsPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
+        // --- Solution Button Styling ---
+        Color solutionBackground = new Color(210, 210, 210);
+        Color solutionHover = new Color(190, 190, 190);
+        Color solutionBorderColor = new Color(170, 170, 170);
+        Font solutionFont = new Font("Arial", Font.BOLD, 20);
+
+        Border solutionBorder = BorderFactory.createLineBorder(solutionBorderColor, 2);
+
         for (int i = 0; i < 10; i++) {
             solutionButton[i] = new JButton(String.valueOf(i));
             solutionButton[i].setActionCommand(String.valueOf(i));
-            solutionButton[i].setFont(new Font("Arial", Font.BOLD, 24));
+            solutionButton[i].setFont(solutionFont);
             solutionButton[i].setPreferredSize(new Dimension(40, 40));
+            solutionButton[i].setBorder(roundedBorder);
             solutionButton[i].setFocusPainted(false);
+            solutionButton[i].setOpaque(true);
             solutionButton[i].setBorder(BorderFactory.createRaisedBevelBorder());
+
+            // Set solution button colors and border
+            solutionButton[i].setBackground(solutionBackground);
+            solutionButton[i].setForeground(new Color(220, 53, 69));
+            solutionButton[i].setBorder(solutionBorder);
+            solutionButton[i].setCursor(new Cursor(Cursor.HAND_CURSOR));
 
             // Add hover effect
             final int index = i;
             solutionButton[i].addMouseListener(new java.awt.event.MouseAdapter() {
                 public void mouseEntered(java.awt.event.MouseEvent evt) {
                     if (solutionButton[index].isEnabled()) {
-                        solutionButton[index].setBackground(new Color(0, 86, 179));
+                        solutionButton[index].setBackground(solutionHover);
                     }
                 }
 
                 public void mouseExited(java.awt.event.MouseEvent evt) {
                     if (solutionButton[index].isEnabled()) {
-                        solutionButton[index].setBackground(new Color(0, 123, 255));
+                        solutionButton[index].setBackground(solutionBackground);
                     }
                 }
             });

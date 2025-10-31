@@ -3,6 +3,7 @@ package com.heartgame.view;
 import com.heartgame.controller.LoginController;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import java.awt.*;
 import java.io.Serial;
 
@@ -40,6 +41,7 @@ public class LoginGUI extends JFrame {
         // Title
         titleLabel.setBounds(100, 20, 200, 25);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 18));
+        titleLabel.setForeground(new Color(220, 53, 69));
         titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
 
         // Username
@@ -51,36 +53,89 @@ public class LoginGUI extends JFrame {
         passwordField.setBounds(160, 110, 170, 25);
 
         // Login button
+        loginButton.setBackground(new Color(230, 230, 230));
+        loginButton.setForeground(new Color(0, 123, 255));
         loginButton.setBounds(150, 160, 100, 40);
         loginButton.setFont(new Font("Arial", Font.BOLD, 14));
+        Border roundedBorder = BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(Color.LIGHT_GRAY, 2, true),
+                BorderFactory.createEmptyBorder(8, 12, 8, 12)
+        );
+        loginButton.setBorder(roundedBorder);
+        loginButton.setOpaque(true);
+        loginButton.setFocusPainted(false);
+        loginButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        loginButton.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                if (loginButton.isEnabled()) {
+                    loginButton.setBackground(new Color(200, 200, 200));
+                }
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                if (loginButton.isEnabled()) {
+                    loginButton.setBackground(new Color(230, 230, 230));
+                }
+            }
+        });
 
         // Separator line
         JSeparator separator = new JSeparator();
         separator.setBounds(80, 220, 250, 10);
 
         // Register button
-        JLabel newUserLabel = new JLabel("Don't have an account?");
-        newUserLabel.setBounds(120, 240, 170, 35);
-        newUserLabel.setFont(new Font("Arial", Font.BOLD, 14));
-        newUserLabel.setForeground(Color.DARK_GRAY);
+        JLabel registerLabel = new JLabel("Don't have an account?");
+        registerLabel.setBounds(120, 240, 170, 35);
+        registerLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        registerLabel.setForeground(Color.DARK_GRAY);
 
         registerButton.setBounds(130, 290, 140, 30);
         registerButton.setFont(new Font("Arial", Font.PLAIN, 14));
-        registerButton.setBackground(new Color(108, 117, 125)); // Gray
+        registerButton.setBackground(new Color(230, 230, 230));
+        registerButton.setForeground(new Color(0, 123, 255));
+        registerButton.setBorder(roundedBorder);
+        registerButton.setOpaque(true);
         registerButton.setFocusPainted(false);
+        registerButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
         registerButton.addActionListener(e -> openRegisterWindow());
+        registerButton.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                if (registerButton.isEnabled()) {
+                    registerButton.setBackground(new Color(200, 200, 200));
+                }
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                if (registerButton.isEnabled()) {
+                    registerButton.setBackground(new Color(230, 230, 230));
+                }
+            }
+        });
 
         // OR separator
         JLabel orLabel = new JLabel("OR");
         orLabel.setBounds(180, 325, 40, 20);
-        orLabel.setFont(new Font("Arial", Font.BOLD, 12));
         orLabel.setForeground(Color.GRAY);
 
         // Google OAuth button
         googleLoginButton.setBounds(100, 350, 200, 30);
         googleLoginButton.setFont(new Font("Arial", Font.PLAIN, 14));
-        googleLoginButton.setBackground(new Color(66, 133, 244)); // Google blue
+        googleLoginButton.setBackground(new Color(230, 230, 230));
+        googleLoginButton.setForeground(new Color(0, 123, 255));
+        googleLoginButton.setBorder(roundedBorder);
+        googleLoginButton.setOpaque(true);
         googleLoginButton.setFocusPainted(false);
+        googleLoginButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        googleLoginButton.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                if (googleLoginButton.isEnabled()) {
+                    googleLoginButton.setBackground(new Color(200, 200, 200));
+                }
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                if (googleLoginButton.isEnabled()) {
+                    googleLoginButton.setBackground(new Color(230, 230, 230));
+                }
+            }
+        });
 
         // Add components to panel
         panel.add(titleLabel);
@@ -92,7 +147,7 @@ public class LoginGUI extends JFrame {
         panel.add(orLabel);
         panel.add(googleLoginButton);
         panel.add(separator);
-        panel.add(newUserLabel);
+        panel.add(registerLabel);
         panel.add(registerButton);
 
         getContentPane().add(panel);
