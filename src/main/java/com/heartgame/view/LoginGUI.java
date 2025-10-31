@@ -1,6 +1,8 @@
 package com.heartgame.view;
 
 import com.heartgame.controller.LoginController;
+import com.heartgame.event.GameEventManager;
+import com.heartgame.event.GameEventType;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -10,6 +12,7 @@ import java.io.Serial;
 /**
  * The view for the login screen
  * Supports both traditional password login and Google OAuth 2.0
+ * Uses event-driven navigation (publishes NAVIGATE_TO_REGISTER event)
  */
 public class LoginGUI extends JFrame {
 
@@ -158,11 +161,11 @@ public class LoginGUI extends JFrame {
     }
 
     /**
-     * Opens the registration window and closes the login window
+     * Opens the registration window using navigation event
      */
     private void openRegisterWindow() {
-        this.dispose();
-        SwingUtilities.invokeLater(() -> new RegisterGUI().setVisible(true));
+        // Publish navigation event (event-driven approach)
+        GameEventManager.getInstance().publish(GameEventType.NAVIGATE_TO_REGISTER, null);
     }
 
 

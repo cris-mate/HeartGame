@@ -2,6 +2,7 @@ package com.heartgame.event;
 
 /**
  * Defines the types of events that can be published within the game
+ * Includes navigation events for decoupled screen transitions
  */
 public enum GameEventType {
 
@@ -75,5 +76,37 @@ public enum GameEventType {
      * Published when the game is resumed from pause
      * Data: Integer (remaining seconds when resumed)
      */
-    GAME_RESUMED
+    GAME_RESUMED,
+
+    // ========== Navigation Events ==========
+
+    /**
+     * Published to request navigation to the login screen
+     * Data: null
+     */
+    NAVIGATE_TO_LOGIN,
+
+    /**
+     * Published to request navigation to the home screen
+     * Data: null
+     */
+    NAVIGATE_TO_HOME,
+
+    /**
+     * Published to request navigation to the game screen
+     * Data: null
+     */
+    NAVIGATE_TO_GAME,
+
+    /**
+     * Published to request navigation to the leaderboard screen
+     * Data: null
+     */
+    NAVIGATE_TO_LEADERBOARD,
+
+    /**
+     * Published to request navigation to the registration screen
+     * Data: null
+     */
+    NAVIGATE_TO_REGISTER
 }

@@ -2,8 +2,9 @@ package com.heartgame.controller;
 
 import com.heartgame.model.User;
 import com.heartgame.persistence.UserDAO;
-import com.heartgame.view.LoginGUI;
 import com.heartgame.view.RegisterGUI;
+import com.heartgame.event.GameEventManager;
+import com.heartgame.event.GameEventType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,6 +13,7 @@ import java.util.regex.Pattern;
 
 /**
  * Controller for handling user registration
+ * Uses event-driven navigation for screen transitions (low coupling)
  * Validates input, creates new users in the database, and manages navigation
  */
 public class RegisterController {
@@ -92,7 +94,7 @@ public class RegisterController {
                     JOptionPane.INFORMATION_MESSAGE
             );
 
-            // Navigate back to login
+            // Navigate back to login using event
             navigateToLogin();
         } else {
             logger.error("Failed to create user '{}' in database", username);
@@ -145,10 +147,10 @@ public class RegisterController {
     }
 
     /**
-     * Closes the registration screen and navigates to the login screen
+     * Navigates to the login screen using navigation event
      */
     private void navigateToLogin() {
-        registerView.dispose();
-        SwingUtilities.invokeLater(() -> new LoginGUI().setVisible(true));
+        // Publish navigation event (event-driven approach)
+        GameEventManager.getInstance().publish(GameEventType.NAVIGATE_TO_LOGIN, null);
     }
 }

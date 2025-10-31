@@ -4,7 +4,6 @@ import com.heartgame.model.User;
 import com.heartgame.model.UserSession;
 import com.heartgame.persistence.UserDAO;
 import com.heartgame.service.GoogleAuthService;
-import com.heartgame.view.HomeGUI;
 import com.heartgame.view.LoginGUI;
 import com.heartgame.event.GameEventType;
 import com.heartgame.event.GameEventManager;
@@ -15,6 +14,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Controller for handling login with both password-based and OAuth authentication
+ * Uses event-driven navigation for screen transitions (low coupling)
  * Publishes an event on successful login
  */
 public class LoginController {
@@ -45,7 +45,7 @@ public class LoginController {
 
     /**
      * Performs traditional password-based login
-     * On success, publishes a PLAYER_LOGGED_IN event before transitioning to the main game view
+     * On success, publishes a PLAYER_LOGGED_IN event and navigates to home
      * On failure, displays an error message
      */
     private void performPasswordLogin() {
@@ -170,7 +170,7 @@ public class LoginController {
 
     /**
      * Common method for successful login (password or OAuth)
-     * Stores user in session, publishes event, and transitions to game view
+     * Stores user in session, publishes event, and navigates to home via event
      * @param user The authenticated user
      */
     private void loginSuccessful(User user) {
@@ -180,10 +180,7 @@ public class LoginController {
         // Publish login event
         GameEventManager.getInstance().publish(GameEventType.PLAYER_LOGGED_IN, user);
 
-        // Close login window
-        loginView.dispose();
-
-        // Open home window
-        SwingUtilities.invokeLater(() -> new HomeGUI().setVisible(true));
+        // Navigate to home screen using event (event-driven approach)
+        GameEventManager.getInstance().publish(GameEventType.NAVIGATE_TO_HOME, null);
     }
 }

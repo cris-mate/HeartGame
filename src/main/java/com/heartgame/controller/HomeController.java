@@ -3,9 +3,6 @@ package com.heartgame.controller;
 import com.heartgame.model.User;
 import com.heartgame.model.UserSession;
 import com.heartgame.view.HomeGUI;
-import com.heartgame.view.GameGUI;
-import com.heartgame.view.LeaderboardGUI;
-import com.heartgame.view.LoginGUI;
 import com.heartgame.event.GameEventType;
 import com.heartgame.event.GameEventManager;
 import org.slf4j.Logger;
@@ -15,7 +12,7 @@ import javax.swing.*;
 
 /**
  * Controller for handling home screen actions
- * Manages navigation between home, game, leaderboard and login screens
+ * Uses event-driven navigation for screen transitions (low coupling)
  */
 public class HomeController {
 
@@ -48,7 +45,7 @@ public class HomeController {
 
     /**
      * Handles the Start Game button
-     * Closes home view and opens game view
+     * Publishes navigation event instead of directly creating GUI
      */
     private void handleStartGame() {
         User currentUser = UserSession.getInstance().getCurrentUser();
@@ -58,19 +55,13 @@ public class HomeController {
         }
         logger.info("User '{}' starting new game from home screen", currentUser.getUsername());
 
-        // Close home window
-        homeView.dispose();
-
-        // Open game window
-        SwingUtilities.invokeLater(() -> {
-            GameGUI gameGUI = new GameGUI();
-            gameGUI.setVisible(true);
-        });
+        // Publish navigation event (event-driven approach)
+        GameEventManager.getInstance().publish(GameEventType.NAVIGATE_TO_GAME, null);
     }
 
     /**
      * Handles the Leaderboard button
-     * Closes home view and opens leaderboard view
+     * Publishes navigation event instead of directly creating GUI
      */
     private void handleLeaderboard() {
         User currentUser = UserSession.getInstance().getCurrentUser();
@@ -80,18 +71,13 @@ public class HomeController {
         }
         logger.info("User '{}' viewing leaderboard from home screen", currentUser.getUsername());
 
-        homeView.dispose();
-
-        // Open leaderboard window
-        SwingUtilities.invokeLater(() -> {
-            LeaderboardGUI leaderboardGUI = new LeaderboardGUI();
-            leaderboardGUI.setVisible(true);
-        });
+        // Publish navigation event (event-driven approach)
+        GameEventManager.getInstance().publish(GameEventType.NAVIGATE_TO_LEADERBOARD, null);
     }
 
     /**
      * Handles the Logout button
-     * Logs out user, closes home view, and returns to login screen
+     * Logs out user and publishes navigation event to login screen
      */
     private void handleLogout() {
         int confirm = JOptionPane.showConfirmDialog(
@@ -113,13 +99,8 @@ public class HomeController {
             // Clear user session
             UserSession.getInstance().logout();
 
-            homeView.dispose();
-
-            // Open login window
-            SwingUtilities.invokeLater(() -> {
-                LoginGUI loginGUI = new LoginGUI();
-                loginGUI.setVisible(true);
-            });
+            // Publish navigation event to login screen (event-driven approach)
+            GameEventManager.getInstance().publish(GameEventType.NAVIGATE_TO_LOGIN, null);
         }
     }
 

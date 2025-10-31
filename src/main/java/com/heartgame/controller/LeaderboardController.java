@@ -4,8 +4,9 @@ import com.heartgame.model.GameSession;
 import com.heartgame.model.User;
 import com.heartgame.model.UserSession;
 import com.heartgame.persistence.GameSessionDAO;
-import com.heartgame.view.HomeGUI;
 import com.heartgame.view.LeaderboardGUI;
+import com.heartgame.event.GameEventManager;
+import com.heartgame.event.GameEventType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,6 +15,7 @@ import java.util.List;
 
 /**
  * Controller for handling leaderboard actions
+ * Uses event-driven navigation for screen transitions (low coupling)
  * Manages data retrieval and user interactions
  */
 public class LeaderboardController {
@@ -54,7 +56,7 @@ public class LeaderboardController {
     private void loadLeaderboard() {
         logger.info("Loading leaderboard data");
 
-        // Show loading state (optional enhancement)
+        // Show loading state
         leaderboardView.getRefreshButton().setEnabled(false);
         leaderboardView.getRefreshButton().setText("Loading...");
 
@@ -110,7 +112,7 @@ public class LeaderboardController {
     }
 
     /**
-     * Handles the back button - returns to home screen
+     * Handles the back button - returns to home screen using navigation event
      */
     private void handleBack() {
         User currentUser = UserSession.getInstance().getCurrentUser();
@@ -118,13 +120,7 @@ public class LeaderboardController {
             logger.debug("User '{}' navigating back to home", currentUser.getUsername());
         }
 
-        // Close leaderboard window
-        leaderboardView.dispose();
-
-        // Open home window
-        SwingUtilities.invokeLater(() -> {
-            HomeGUI homeGUI = new HomeGUI();
-            homeGUI.setVisible(true);
-        });
+        // Publish navigation event (event-driven approach)
+        GameEventManager.getInstance().publish(GameEventType.NAVIGATE_TO_HOME, null);
     }
 }
