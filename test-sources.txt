@@ -1,0 +1,10 @@
+src/test/java/com/heartgame/util/ConfigurationManagerTest.java
+src/test/java/com/heartgame/util/HTTPClientTest.java
+src/test/java/com/heartgame/model/UserSessionTest.java
+src/test/java/com/heartgame/model/QuestionTest.java
+src/test/java/com/heartgame/model/UserTest.java
+src/test/java/com/heartgame/model/GameSessionTest.java
+src/test/java/com/heartgame/event/GameEventManagerTest.java
+src/test/java/com/heartgame/service/ScoringServiceTest.java
+src/test/java/com/heartgame/service/GameTimerTest.java
+src/test/java/com/heartgame/service/AuthenticationServiceTest.java
