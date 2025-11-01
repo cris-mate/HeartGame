@@ -23,7 +23,8 @@ import org.slf4j.LoggerFactory;
  * Controller for handling the main game logic
  * Publishes events based on user actions
  * Uses UserSession to access current user information
- * Subscribes to timer events for game timer management
+ * Listens to game events and updates view accordingly (proper MVC pattern)
+ * Handles GAME_ENDED event published by GameTimer for cleanup
  * Saves game sessions to database for leaderboard
  */
 public class GameController implements GameEventListener {
@@ -46,6 +47,7 @@ public class GameController implements GameEventListener {
      * Initializes services, links the controller to the view,
      * loads the first question and publishes the GAME_STARTED event
      * Uses UserSession to access the current authenticated user
+     * Subscribes to game events to update view (proper MVC pattern)
      * @param gameView The game view it controls
      */
     public GameController(GameGUI gameView) {
@@ -58,9 +60,12 @@ public class GameController implements GameEventListener {
         this.gameStartTime = Instant.now();
         this.questionsAnsweredCount = 0;
 
-        // Subscribe to timer events
-        GameEventManager.getInstance().subscribe(GameEventType.TIMER_TICK, this);
-        GameEventManager.getInstance().subscribe(GameEventType.TIMER_EXPIRED, this);
+        // Subscribe to events (proper MVC: controller mediates between model and view)
+        GameEventManager eventManager = GameEventManager.getInstance();
+        eventManager.subscribe(GameEventType.TIMER_TICK, this);
+        eventManager.subscribe(GameEventType.GAME_ENDED, this);
+        eventManager.subscribe(GameEventType.CORRECT_ANSWER_SUBMITTED, this);
+        eventManager.subscribe(GameEventType.INCORRECT_ANSWER_SUBMITTED, this);
 
         initController();
         loadNextGame();
@@ -73,7 +78,7 @@ public class GameController implements GameEventListener {
         }
         logger.info("Game started for user '{}'.", currentUser.getUsername());
         // this triggers GameTimer to start countdown
-        GameEventManager.getInstance().publish(GameEventType.GAME_STARTED, currentUser);
+        eventManager.publish(GameEventType.GAME_STARTED, currentUser);
     }
 
     /**
@@ -86,20 +91,45 @@ public class GameController implements GameEventListener {
     }
 
     /**
-     * Handles game events including timer updates
-     * Responds to TIMER_TICK and TIMER_EXPIRED events
+     * Handles game events including timer updates and game ending
+     * Updates view based on events (proper MVC pattern)
      * @param eventType The type of event that occurred
-     * @param data      Event data (remainingSeconds for TIMER_TICK, null for TIMER_EXPIRED)
+     * @param data      Event data (remainingSeconds for TIMER_TICK, score for answer events)
      */
     @Override
     public void onGameEvent(GameEventType eventType, Object data) {
-        if (eventType == GameEventType.TIMER_TICK && data instanceof Integer) {
-            int remainingSeconds = (Integer) data;
-            gameView.updateTimer(remainingSeconds);
-            logger.trace("Timer updated: {}s remaining.", remainingSeconds);
-        } else if (eventType == GameEventType.TIMER_EXPIRED) {
-            logger.info("Time expired - game over");
-            endGame();
+        switch (eventType) {
+            case TIMER_TICK:
+                if (data instanceof Integer) {
+                    int remainingSeconds = (Integer) data;
+                    gameView.updateTimer(remainingSeconds);
+                    logger.trace("Timer updated: {}s remaining.", remainingSeconds);
+                }
+                break;
+
+            case GAME_ENDED:
+                // GameTimer published GAME_ENDED when time expired
+                logger.info("Game ended - handling cleanup");
+                endGame();
+                break;
+
+            case CORRECT_ANSWER_SUBMITTED:
+                // Update view with correct answer feedback (proper MVC)
+                if (data instanceof Integer) {
+                    gameView.showCorrectAnswerFeedback((Integer) data);
+                }
+                break;
+
+            case INCORRECT_ANSWER_SUBMITTED:
+                // Update view with incorrect answer feedback (proper MVC)
+                if (data instanceof Integer) {
+                    gameView.showIncorrectAnswerFeedback((Integer) data);
+                }
+                break;
+
+            default:
+                // Ignore other events
+                break;
         }
     }
 
@@ -141,9 +171,14 @@ public class GameController implements GameEventListener {
 
     /**
      * Ends the game
-     * Stops accepting answers, disables buttons, and shows final score
+     * Stops accepting answers, disables buttons, saves session, and shows final score
+     * Note: GAME_ENDED event already published by GameTimer, so we don't publish it again
      */
     private void endGame() {
+        if (!isGameActive) {
+            return; // Already ended
+        }
+
         isGameActive = false;
         gameTimer.stopTimer();
         gameView.disableSolutionButtons();
@@ -153,9 +188,6 @@ public class GameController implements GameEventListener {
 
         // Save game session to database
         saveGameSession(finalScore);
-
-        // Publish game ended event
-        GameEventManager.getInstance().publish(GameEventType.GAME_ENDED, finalScore);
 
         // Show game over dialog
         gameView.showGameOver(finalScore);
@@ -264,11 +296,19 @@ public class GameController implements GameEventListener {
     }
 
     /**
-     * Stops the game timer
+     * Stops the game timer and unsubscribes from events
      * Should be called when user exits the game
      */
-    public void cleanup () {
+    public void cleanup() {
         gameTimer.stopTimer();
+
+        // Unsubscribe from events to prevent memory leaks
+        GameEventManager eventManager = GameEventManager.getInstance();
+        eventManager.unsubscribe(GameEventType.TIMER_TICK, this);
+        eventManager.unsubscribe(GameEventType.GAME_ENDED, this);
+        eventManager.unsubscribe(GameEventType.CORRECT_ANSWER_SUBMITTED, this);
+        eventManager.unsubscribe(GameEventType.INCORRECT_ANSWER_SUBMITTED, this);
+
         logger.debug("GameController cleanup completed");
     }
 }

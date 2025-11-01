@@ -10,9 +10,8 @@ import javax.swing.Timer;
 /**
  * Manages the game session timer - a countdown of the game
  * Timer starts when game begins and counts down from 60 seconds
- * Supports pause and resume functionality
- * Game ends when timer reaches zero
- * Publishes TIMER_TICK and TIMER_EXPIRED events for UI updates
+ * Supports Pause and Resume functionality
+ * Takes full ownership of timer lifecycle by publishing GAME_ENDED when time expires
  */
 public class GameTimer implements GameEventListener {
 
@@ -25,7 +24,8 @@ public class GameTimer implements GameEventListener {
     /**
      * Constructs a new GameTimer
      * Automatically subscribes to GAME_STARTED event to begin countdown
-     * Publishes TIMER_TICK events every second and TIMER_EXPIRED when time runs out
+     * Publishes TIMER_TICK events every second
+     * Publishes GAME_ENDED when time runs out
      */
     public GameTimer() {
         GameEventManager.getInstance().subscribe(GameEventType.GAME_STARTED, this);
@@ -67,20 +67,20 @@ public class GameTimer implements GameEventListener {
 
                 // Check if time expired
                 if (remainingTime <= 0) {
-                    logger.info("Timer expired - game over");
+                    logger.info("Timer expired - publishing GAME_ENDED");
                     stopTimer();
-                    GameEventManager.getInstance().publish(GameEventType.TIMER_EXPIRED, null);
+                    GameEventManager.getInstance().publish(GameEventType.GAME_ENDED, null);
                 }
             }
         });
         swingTimer.start();
 
-        // Send initial update immediately
+        // Send initial update
         GameEventManager.getInstance().publish(GameEventType.TIMER_TICK, remainingTime);
     }
 
     /**
-     * Pauses the timer
+     * Pauses the timer on user display
      * Timer continues running but time doesn't decrease
      */
     public void pauseTimer() {
@@ -97,7 +97,6 @@ public class GameTimer implements GameEventListener {
         if (swingTimer != null && swingTimer.isRunning() && isPaused) {
             isPaused = false;
             logger.debug("Timer resumed from {}s remaining", remainingTime);
-            // Immediately update UI when resuming
             GameEventManager.getInstance().publish(GameEventType.TIMER_TICK, remainingTime);
         }
     }

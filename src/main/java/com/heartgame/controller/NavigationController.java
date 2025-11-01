@@ -4,9 +4,9 @@ import com.heartgame.event.GameEventListener;
 import com.heartgame.event.GameEventManager;
 import com.heartgame.event.GameEventType;
 import com.heartgame.view.*;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import javax.swing.*;
 import java.awt.*;
 

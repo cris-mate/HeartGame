@@ -4,7 +4,6 @@ import com.heartgame.controller.GameController;
 import com.heartgame.model.User;
 import com.heartgame.model.UserSession;
 import com.heartgame.event.GameEventType;
-import com.heartgame.event.GameEventListener;
 import com.heartgame.event.GameEventManager;
 
 import javax.swing.*;
@@ -15,12 +14,12 @@ import java.io.Serial;
 
 /**
  * The main view for the game screen
- * Reacts to events updating the UI
+ * UI is updated by GameController (proper MVC pattern)
  * Uses UserSession for accessing current user information
  * Uses navigation events for screen transitions
  * Includes pause/resume and stop game functionality
  */
-public class GameGUI extends JFrame implements GameEventListener {
+public class GameGUI extends JFrame {
 
     @Serial
     private static final long serialVersionUID = -107785653906635L;
@@ -264,27 +263,26 @@ public class GameGUI extends JFrame implements GameEventListener {
         // Add main panel to frame
         getContentPane().add(mainPanel);
 
-        // Subscribe to game events
-        GameEventManager.getInstance().subscribe(GameEventType.CORRECT_ANSWER_SUBMITTED, this);
-        GameEventManager.getInstance().subscribe(GameEventType.INCORRECT_ANSWER_SUBMITTED, this);
-
         // Initialize controller & start the game
         controller = new GameController(this);
     }
 
     /**
-     * Handles game events to provide visual feedback to the user
-     * Updates the info text based on whether a correct or incorrect solution was submitted
-     * @param eventType The type of event that occurred
-     * @param data      The current score, passed as an Integer
+     * Shows feedback for a correct answer
+     * Called by GameController (proper MVC pattern)
+     * @param score The new score after correct answer
      */
-    @Override
-    public void onGameEvent(GameEventType eventType, Object data) {
-        if (eventType == GameEventType.CORRECT_ANSWER_SUBMITTED) {
-            updateScoreWithFeedback((int) data, "Good! Keep going!   Current ", new Color(34, 139, 34));
-        } else if (eventType == GameEventType.INCORRECT_ANSWER_SUBMITTED) {
-            updateScoreWithFeedback((int) data, "Oops! Try again!   Current ", new Color(220, 53, 69));
-        }
+    public void showCorrectAnswerFeedback(int score) {
+        updateScoreWithFeedback(score, "Good! Keep going!   Current ", new Color(34, 139, 34));
+    }
+
+    /**
+     * Shows feedback for an incorrect answer
+     * Called by GameController (proper MVC pattern)
+     * @param score The current score (unchanged)
+     */
+    public void showIncorrectAnswerFeedback(int score) {
+        updateScoreWithFeedback(score, "Oops! Try again!   Current ", new Color(220, 53, 69));
     }
 
     /**
@@ -334,10 +332,6 @@ public class GameGUI extends JFrame implements GameEventListener {
                 controller.cleanup();
             }
 
-            // Unsubscribe from events
-            GameEventManager.getInstance().unsubscribe(GameEventType.CORRECT_ANSWER_SUBMITTED, this);
-            GameEventManager.getInstance().unsubscribe(GameEventType.INCORRECT_ANSWER_SUBMITTED, this);
-
             // Close this window
             this.dispose();
 
@@ -378,10 +372,6 @@ public class GameGUI extends JFrame implements GameEventListener {
             if (controller != null) {
                 controller.cleanup();
             }
-
-            // Unsubscribe from events to prevent memory leaks
-            GameEventManager.getInstance().unsubscribe(GameEventType.CORRECT_ANSWER_SUBMITTED, this);
-            GameEventManager.getInstance().unsubscribe(GameEventType.INCORRECT_ANSWER_SUBMITTED, this);
 
             this.dispose();
 
@@ -507,9 +497,6 @@ public class GameGUI extends JFrame implements GameEventListener {
                 controller.cleanup();
             }
 
-            GameEventManager.getInstance().unsubscribe(GameEventType.CORRECT_ANSWER_SUBMITTED, this);
-            GameEventManager.getInstance().unsubscribe(GameEventType.INCORRECT_ANSWER_SUBMITTED, this);
-
             // Restart the game using navigation event
             this.dispose();
             GameEventManager.getInstance().publish(GameEventType.NAVIGATE_TO_GAME, null);
@@ -518,9 +505,6 @@ public class GameGUI extends JFrame implements GameEventListener {
             if (controller != null) {
                 controller.cleanup();
             }
-
-            GameEventManager.getInstance().unsubscribe(GameEventType.CORRECT_ANSWER_SUBMITTED, this);
-            GameEventManager.getInstance().unsubscribe(GameEventType.INCORRECT_ANSWER_SUBMITTED, this);
 
             this.dispose();
             GameEventManager.getInstance().publish(GameEventType.NAVIGATE_TO_HOME, null);
