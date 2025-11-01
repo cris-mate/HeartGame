@@ -16,17 +16,22 @@ import org.slf4j.LoggerFactory;
 public final class GameEventManager {
 
     private static final Logger logger = LoggerFactory.getLogger(GameEventManager.class);
-    private static GameEventManager instance;
+    private static volatile GameEventManager instance;
     private final Map<GameEventType, List<GameEventListener>> listeners = new HashMap<>();
 
     private GameEventManager() {}
 
     /**
+     * Thread-safe singleton implementation using double-checked locking
      * @return The single instance of the GameEventManager
      */
     public static GameEventManager getInstance() {
         if (instance == null) {
-            instance = new GameEventManager();
+            synchronized (GameEventManager.class) {
+                if (instance == null) {
+                    instance = new GameEventManager();
+                }
+            }
         }
         return instance;
     }
