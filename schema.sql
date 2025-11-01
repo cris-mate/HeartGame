@@ -11,7 +11,6 @@ CREATE TABLE IF NOT EXISTS users (
     username VARCHAR(50) UNIQUE NOT NULL,
     password_hash VARCHAR(60) NULL,  -- NULL for OAuth users
     email VARCHAR(100),
-    display_name VARCHAR(100),
     oauth_provider VARCHAR(20),  -- 'password', 'google', etc.
     oauth_id VARCHAR(255),  -- OAuth provider's user ID
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -51,7 +50,7 @@ CREATE TABLE IF NOT EXISTS logging_event (
 );
 
 -- Insert test users
--- Password for both users: "password123"
+-- Password for users: "password123"
 -- BCrypt hash: $2a$10$xKx7KN7KvjJO3YYqXjjGG.f5JYDEyqJQrqVqP0Ry6U5YqJY2Y0N/2
 
 INSERT INTO users (username, password_hash, email, display_name, oauth_provider) VALUES
