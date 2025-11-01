@@ -52,7 +52,7 @@ public class LeaderboardGUI extends JFrame {
 
         setSize(900, 680);
         setLocationRelativeTo(null);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         // Main panel
         JPanel mainPanel = new JPanel(new BorderLayout(20, 20));
