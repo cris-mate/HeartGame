@@ -312,10 +312,10 @@ public class NavigationTest {
             eventManager.unsubscribe(GameEventType.NAVIGATE_TO_REGISTER, faultyListener);
             eventManager.unsubscribe(GameEventType.NAVIGATE_TO_REGISTER, goodListener);
 
-            System.out.println("    Event system isolates errors correctly (faulty listeners don't break event chain)");
+            System.out.println("   ✓ Event system isolates errors correctly (faulty listeners don't break event chain)");
             testsPassed++;
         } catch (Exception e) {
-            System.out.println("    Event error isolation test failed: " + e.getMessage());
+            System.out.println("   ✗ Event error isolation test failed: " + e.getMessage());
             e.printStackTrace();
             testsFailed++;
         }
@@ -359,10 +359,10 @@ public class NavigationTest {
             // Cleanup
             eventManager.unsubscribe(GameEventType.GAME_STARTED, counterListener);
 
-            System.out.println("    Concurrent event publishing handled correctly (" + expectedEvents + " events)");
+            System.out.println("   ✓ Concurrent event publishing handled correctly (" + expectedEvents + " events)");
             testsPassed++;
         } catch (Exception e) {
-            System.out.println("    Concurrent event publishing test failed: " + e.getMessage());
+            System.out.println("   ✗ Concurrent event publishing test failed: " + e.getMessage());
             e.printStackTrace();
             testsFailed++;
         }
@@ -436,10 +436,10 @@ public class NavigationTest {
             eventManager.unsubscribe(GameEventType.NAVIGATE_TO_LEADERBOARD, navTestListener);
             eventManager.unsubscribe(GameEventType.NAVIGATE_TO_REGISTER, navTestListener);
 
-            System.out.println("    All navigation events (Login, Home, Game, Leaderboard, Register) handled correctly");
+            System.out.println("   ✓ All navigation events (Login, Home, Game, Leaderboard, Register) handled correctly");
             testsPassed++;
         } catch (Exception e) {
-            System.out.println("    Navigation to all screens test failed: " + e.getMessage());
+            System.out.println("   ✗ Navigation to all screens test failed: " + e.getMessage());
             e.printStackTrace();
             testsFailed++;
         }
