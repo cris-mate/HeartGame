@@ -1,7 +1,6 @@
 -- HeartGame Database Schema
--- Updated to support Google OAuth 2.0 authentication
+-- Supports Google OAuth 2.0 authentication
 
--- Create database if not exists
 CREATE DATABASE IF NOT EXISTS heartgame;
 USE heartgame;
 
@@ -32,7 +31,7 @@ CREATE TABLE IF NOT EXISTS game_sessions (
 
 -- Game events log table (for the logback appender)
 CREATE TABLE IF NOT EXISTS logging_event (
-    timestamp BIGINT NOT NULL,
+    timestmp BIGINT NOT NULL,
     formatted_message TEXT NOT NULL,
     logger_name VARCHAR(254) NOT NULL,
     level_string VARCHAR(254) NOT NULL,
@@ -49,14 +48,20 @@ CREATE TABLE IF NOT EXISTS logging_event (
     event_id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY
 );
 
--- Insert test users
--- Password for users: "password123"
--- BCrypt hash: $2a$10$xKx7KN7KvjJO3YYqXjjGG.f5JYDEyqJQrqVqP0Ry6U5YqJY2Y0N/2
+-- Stores exception data related to a log event.
+CREATE TABLE IF NOT EXISTS logging_event_exception (
+  event_id         BIGINT NOT NULL,
+  i                SMALLINT NOT NULL,
+  trace_line       VARCHAR(254) NOT NULL,
+  PRIMARY KEY(event_id, i),
+  FOREIGN KEY (event_id) REFERENCES logging_event(event_id) ON DELETE CASCADE
+);
 
-INSERT INTO users (username, password_hash, email, display_name, oauth_provider) VALUES
-('admin', '$2a$10$xKx7KN7KvjJO3YYqXjjGG.f5JYDEyqJQrqVqP0Ry6U5YqJY2Y0N/2', 'admin@heartgame.local', 'Administrator', 'password')
-ON DUPLICATE KEY UPDATE username=username;
-
-INSERT INTO users (username, password_hash, email, display_name, oauth_provider) VALUES
-('demo', '$2a$10$xKx7KN7KvjJO3YYqXjjGG.f5JYDEyqJQrqVqP0Ry6U5YqJY2Y0N/2', 'demo@heartgame.local', 'Demo User', 'password')
-ON DUPLICATE KEY UPDATE username=username;
+-- Stores Mapped Diagnostic Context (MDC) properties.
+CREATE TABLE IF NOT EXISTS logging_event_property (
+  event_id          BIGINT NOT NULL,
+  mapped_key        VARCHAR(254) NOT NULL,
+  mapped_value      TEXT,
+  PRIMARY KEY(event_id, mapped_key),
+  FOREIGN KEY (event_id) REFERENCES logging_event(event_id) ON DELETE CASCADE
+  );
