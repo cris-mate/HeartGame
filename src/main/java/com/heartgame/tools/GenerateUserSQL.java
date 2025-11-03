@@ -1,4 +1,4 @@
-package com.heartgame;
+package com.heartgame.tools;
 
 import com.heartgame.service.AuthenticationService;
 

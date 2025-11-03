@@ -1,4 +1,4 @@
-package com.heartgame;
+package com.heartgame.tools;
 
 import com.heartgame.service.AuthenticationService;
 import java.util.Scanner;
@@ -7,7 +7,7 @@ import java.util.Scanner;
  * Interactive tool for generating BCrypt password hashes
  * Uses AuthenticationService for password hashing operations
  */
-public class PasswordHasherTool {
+public class PasswordHasher {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         AuthenticationService authService = new AuthenticationService();
