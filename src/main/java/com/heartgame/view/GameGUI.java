@@ -5,6 +5,7 @@ import com.heartgame.model.User;
 import com.heartgame.model.UserSession;
 import com.heartgame.event.GameEventType;
 import com.heartgame.event.GameEventManager;
+import com.heartgame.service.AvatarService;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -14,7 +15,7 @@ import java.io.Serial;
 
 /**
  * The main view for the game screen
- * UI is updated by GameController (proper MVC pattern)
+ * Reacts to events updating the UI (updated by GameController)
  * Uses UserSession for accessing current user information
  * Uses navigation events for screen transitions
  * Includes pause/resume and stop game functionality
@@ -29,6 +30,7 @@ public class GameGUI extends JFrame {
     private final JLabel scoreLabel = new JLabel("Score: 0");
     private final JButton[] solutionButton = new JButton[10];
     private final GameController controller;
+    private final JLabel avatarLabel = new JLabel();
 
     // Control buttons
     private final JButton startNewGameButton = new JButton("Start New Game");
@@ -57,7 +59,7 @@ public class GameGUI extends JFrame {
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        // Main container with BorderLayout
+        // Main container
         JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
         mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
@@ -66,12 +68,26 @@ public class GameGUI extends JFrame {
         topPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 
         // User info (left side)
-        JPanel userPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JPanel userPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 5));
+
+        // --- Avatar Label ---
+        avatarLabel.setPreferredSize(new Dimension(48, 48));
+        avatarLabel.setBorder(BorderFactory.createLineBorder(new Color(0, 123, 255), 2));
+        avatarLabel.setOpaque(true);
+        avatarLabel.setBackground(Color.WHITE);
+        avatarLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        avatarLabel.setText("...");
+        userPanel.add(avatarLabel);
+
+        // --- Username Label ---
         JLabel userLabel = new JLabel("Playing as: " + user.getUsername());
         userLabel.setFont(new Font("Arial", Font.PLAIN, 18));
         userLabel.setForeground(new Color(0, 123, 255));
         userPanel.add(userLabel);
         topPanel.add(userPanel, BorderLayout.WEST);
+
+        // --- Load Avatar ---
+        loadUserAvatar(user.getUsername());
 
         // Control buttons (right side)
         JPanel controlPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
@@ -265,6 +281,44 @@ public class GameGUI extends JFrame {
 
         // Initialize controller & start the game
         controller = new GameController(this);
+    }
+
+    /**
+     * Loads user avatar asynchronously
+     * Shows loading state and handles errors gracefully
+     * @param username The username to fetch avatar for
+     */
+    private void loadUserAvatar(String username) {
+        SwingWorker<BufferedImage, Void> worker = new SwingWorker<>() {
+            @Override
+            protected BufferedImage doInBackground() {
+                AvatarService avatarService = new AvatarService();
+                return avatarService.fetchAvatar(username);
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    BufferedImage avatar = get();
+                    if (avatar != null) {
+                        // Scale avatar to fit
+                        Image scaledAvatar = avatar.getScaledInstance(48, 48, Image.SCALE_SMOOTH);
+                        avatarLabel.setIcon(new ImageIcon(scaledAvatar));
+                        avatarLabel.setText(null);
+                    } else {
+                        // Fallback to initial letter
+                        avatarLabel.setText(username.substring(0, 1).toUpperCase());
+                        avatarLabel.setFont(new Font("Arial", Font.BOLD, 20));
+                    }
+                } catch (Exception e) {
+                    // Error loading avatar - use fallback
+                    avatarLabel.setText(username.substring(0, 1).toUpperCase());
+                    avatarLabel.setFont(new Font("Arial", Font.BOLD, 20));
+                }
+            }
+        };
+
+        worker.execute();
     }
 
     /**
