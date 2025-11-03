@@ -1,0 +1,7 @@
+# Test Database Configuration - H2 In-Memory Database
+# This configuration is used for unit and integration tests
+# H2 in-memory database is created fresh for each test run
+
+db.url=jdbc:h2:mem:heartgame_test;DB_CLOSE_DELAY=-1;MODE=MySQL
+db.username=sa
+db.password=
