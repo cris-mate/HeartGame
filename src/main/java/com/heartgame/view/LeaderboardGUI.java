@@ -155,16 +155,16 @@ public class LeaderboardGUI extends JFrame {
         centerPanel.add(scrollPane, BorderLayout.CENTER);
 
         // User stats label
-        userStatsLabel.setFont(new Font("Arial", Font.PLAIN, 13));
+        userStatsLabel.setFont(new Font("Arial", Font.PLAIN, 12));
         userStatsLabel.setForeground(new Color(108, 117, 125));
         userStatsLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        userStatsLabel.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
+        userStatsLabel.setBorder(BorderFactory.createEmptyBorder(5, 0, 0, 0));
         centerPanel.add(userStatsLabel, BorderLayout.SOUTH);
 
         mainPanel.add(centerPanel, BorderLayout.CENTER);
 
         // ========== BOTTOM PANEL: Buttons ==========
-        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
+        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 5));
         bottomPanel.setBackground(new Color(248, 249, 250));
 
         // --- Control Button Styling ---

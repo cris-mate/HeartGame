@@ -51,11 +51,8 @@ class HomeControllerTest {
     @DisplayName("Start Game button publishes NAVIGATE_TO_GAME event")
     void testStartGamePublishesEvent() {
         AtomicBoolean eventReceived = new AtomicBoolean(false);
-
         GameEventManager.getInstance().subscribe(GameEventType.NAVIGATE_TO_GAME, (eventType, data) -> eventReceived.set(true));
-
         homeView.getStartGameButton().doClick();
-
         assertTrue(eventReceived.get());
     }
 
@@ -64,11 +61,8 @@ class HomeControllerTest {
     @DisplayName("Leaderboard button publishes NAVIGATE_TO_LEADERBOARD event")
     void testLeaderboardPublishesEvent() {
         AtomicBoolean eventReceived = new AtomicBoolean(false);
-
         GameEventManager.getInstance().subscribe(GameEventType.NAVIGATE_TO_LEADERBOARD, (eventType, data) -> eventReceived.set(true));
-
         homeView.getLeaderboardButton().doClick();
-
         assertTrue(eventReceived.get());
     }
 
@@ -77,10 +71,8 @@ class HomeControllerTest {
     @DisplayName("Start Game does not publish event when no user logged in")
     void testStartGameWithoutUser() {
         UserSession.getInstance().logout();
-
         HomeGUI newView = new HomeGUI();
         AtomicBoolean eventReceived = new AtomicBoolean(false);
-
         GameEventManager.getInstance().subscribe(GameEventType.NAVIGATE_TO_GAME, (eventType, data) -> eventReceived.set(true));
 
         newView.getStartGameButton().doClick();

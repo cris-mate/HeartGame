@@ -229,12 +229,4 @@ public class LoginGUI extends JFrame {
         usernameField.setEnabled(true);
         passwordField.setEnabled(true);
     }
-
-    /**
-     * Main entry point to launch the login GUI
-     * @param args Command-line arguments (not used)
-     */
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(LoginGUI::new);
-    }
 }

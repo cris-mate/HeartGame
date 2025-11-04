@@ -28,12 +28,11 @@ public class DatabaseTestHelper {
                     oauth_provider VARCHAR(20),
                     oauth_id VARCHAR(255),
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    last_login TIMESTAMP NULL
+                    last_login TIMESTAMP NULL,
+                    INDEX idx_username (username),
+                    INDEX idx_oauth (oauth_provider, oauth_id)
                 )
             """);
-
-            stmt.execute("CREATE INDEX IF NOT EXISTS idx_username ON users(username)");
-            stmt.execute("CREATE INDEX IF NOT EXISTS idx_oauth ON users(oauth_provider, oauth_id)");
 
             // Game sessions table
             stmt.execute("""
@@ -74,15 +73,14 @@ public class DatabaseTestHelper {
     /**
      * Clears all data from test tables
      * Used in @BeforeEach to ensure clean state for each test
-     * Maintains referential integrity by deleting in correct order
+     * Deletes in correct order to respect foreign key constraints
      */
     public static void clearAllData(Connection connection) throws SQLException {
         try (Statement stmt = connection.createStatement()) {
-            stmt.execute("SET REFERENTIAL_INTEGRITY FALSE");
-            stmt.execute("TRUNCATE TABLE game_sessions");
-            stmt.execute("TRUNCATE TABLE users");
-            stmt.execute("TRUNCATE TABLE logging_event");
-            stmt.execute("SET REFERENTIAL_INTEGRITY TRUE");
+            // Delete in correct order: child tables first, then parent tables
+            stmt.execute("DELETE FROM game_sessions");
+            stmt.execute("DELETE FROM users");
+            stmt.execute("DELETE FROM logging_event");
         }
     }
 

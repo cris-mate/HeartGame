@@ -223,12 +223,4 @@ public class RegisterGUI extends JFrame {
         passwordField.setEnabled(true);
         confirmPasswordField.setEnabled(true);
     }
-
-    /**
-     * Main entry point to launch the registration GUI
-     * @param args Command-line arguments (not used)
-     */
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(RegisterGUI::new);
-    }
 }

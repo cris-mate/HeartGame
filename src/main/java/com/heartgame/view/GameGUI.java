@@ -564,17 +564,4 @@ public class GameGUI extends JFrame {
             GameEventManager.getInstance().publish(GameEventType.NAVIGATE_TO_HOME, null);
         }
     }
-
-    /**
-     * Main entry point to launch the game GUI
-     * For testing purposes only - in production, use LoginGUI
-     * @param args Command-line arguments (not used)
-     */
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            User testUser = new User("TestPlayer");
-            UserSession.getInstance().login(testUser);
-            new GameGUI().setVisible(true);
-        });
-    }
 }

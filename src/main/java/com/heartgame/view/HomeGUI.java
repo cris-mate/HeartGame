@@ -240,7 +240,6 @@ public class HomeGUI extends JFrame {
         // Add main panel to frame
         getContentPane().add(mainPanel);
 
-        // Initialize controller
         new HomeController(this);
     }
 
@@ -312,17 +311,5 @@ public class HomeGUI extends JFrame {
      */
     public JButton getExitButton() {
         return exitButton;
-    }
-
-    /**
-     * Main entry point for testing
-     * @param args Command-line arguments (not used)
-     */
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            User testUser = new User("TestPlayer");
-            UserSession.getInstance().login(testUser);
-            new HomeGUI().setVisible(true);
-        });
     }
 }
