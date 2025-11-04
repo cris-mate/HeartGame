@@ -150,11 +150,12 @@ public abstract class BaseDAO {
     }
 
     /**
-     * Executes an operation with retry logic
-     * Attempts operation up to maxRetries times
+     * Executes an operation with retry logic and exponential backoff
+     * Makes one initial attempt plus additional retry attempts on failure
      * @param operation The operation to execute
-     * @param maxRetries Maximum number of retry attempts
-     * @return true if operation succeeded, false if all retries failed
+     * @param maxRetries Maximum number of RETRY attempts (total attempts = 1 + maxRetries)
+     *                   Example: maxRetries=2 means 3 total attempts (1 initial + 2 retries)
+     * @return true if operation succeeded, false if all attempts failed
      */
     protected boolean executeWithRetry(DatabaseOperation operation, int maxRetries) {
         int attempts = 0;

@@ -48,6 +48,7 @@ public class GameController implements GameEventListener {
      * Uses UserSession to access the current authenticated user
      * Subscribes to game events to update view
      * @param gameView The game view it controls
+     * @throws IllegalStateException if no user is currently logged in
      */
     public GameController(GameGUI gameView) {
         this.gameView = gameView;
@@ -59,7 +60,7 @@ public class GameController implements GameEventListener {
         this.gameStartTime = Instant.now();
         this.questionsAnsweredCount = 0;
 
-        // Subscribe to events (proper MVC: controller mediates between model and view)
+        // Subscribe to events
         GameEventManager eventManager = GameEventManager.getInstance();
         eventManager.subscribe(GameEventType.TIMER_TICK, this);
         eventManager.subscribe(GameEventType.GAME_ENDED, this);

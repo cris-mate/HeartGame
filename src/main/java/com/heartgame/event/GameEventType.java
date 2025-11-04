@@ -25,9 +25,9 @@ public enum GameEventType {
     GAME_STARTED,
 
     /**
-     * Published when the game ends (timer expired or user quit)
-     * Can be published by GameTimer (when time expires) or GameController (other endings)
-     * Data: Integer (final score) or null if not yet calculated
+     * Published when the game timer expires (countdown reaches zero)
+     * Published by GameTimer when time runs out
+     * Data: null (no data passed - GameController retrieves final score separately)
      */
     GAME_ENDED,
 

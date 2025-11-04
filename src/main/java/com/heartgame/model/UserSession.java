@@ -92,8 +92,9 @@ public final class UserSession {
     }
 
     /**
-     * Updates the last activity timestamp
-     * Called automatically when getCurrentUser() is accessed
+     * Updates the last activity timestamp to the current time
+     * Called automatically when getCurrentUser() is accessed to track activity
+     * Can also be called manually to explicitly record user activity
      */
     public void updateActivity() {
         if (currentUser != null) {

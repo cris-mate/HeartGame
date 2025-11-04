@@ -80,8 +80,9 @@ public class GameTimer implements GameEventListener {
     }
 
     /**
-     * Pauses the timer on user display
-     * Timer continues running but time doesn't decrease
+     * Pauses the game timer countdown
+     * The Swing Timer continues running but remainingTime stops decrementing
+     * The isPaused flag prevents countdown while maintaining timer events
      */
     public void pauseTimer() {
         if (swingTimer != null && swingTimer.isRunning() && !isPaused) {
