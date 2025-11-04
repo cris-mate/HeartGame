@@ -50,9 +50,7 @@ class AuthenticationFlowIntegrationTest {
         GUITestHelper.setPasswordField(registerView, "confirmPasswordField", "password123");
 
         AtomicBoolean navigationEventReceived = new AtomicBoolean(false);
-        GameEventManager.getInstance().subscribe(GameEventType.NAVIGATE_TO_LOGIN, (eventType, data) -> {
-            navigationEventReceived.set(true);
-        });
+        GameEventManager.getInstance().subscribe(GameEventType.NAVIGATE_TO_LOGIN, (eventType, data) -> navigationEventReceived.set(true));
 
         registerView.getRegisterButton().doClick();
 
@@ -80,9 +78,7 @@ class AuthenticationFlowIntegrationTest {
             loggedInUser.set((User) data);
         });
 
-        GameEventManager.getInstance().subscribe(GameEventType.NAVIGATE_TO_HOME, (eventType, data) -> {
-            homeEventReceived.set(true);
-        });
+        GameEventManager.getInstance().subscribe(GameEventType.NAVIGATE_TO_HOME, (eventType, data) -> homeEventReceived.set(true));
 
         LoginGUI loginView = new LoginGUI();
         GUITestHelper.setTextField(loginView, "usernameField", "loginFlowUser");
@@ -113,9 +109,7 @@ class AuthenticationFlowIntegrationTest {
         GUITestHelper.setPasswordField(registerView, "confirmPasswordField", "password123");
 
         AtomicBoolean registerNavigationReceived = new AtomicBoolean(false);
-        GameEventManager.getInstance().subscribe(GameEventType.NAVIGATE_TO_LOGIN, (eventType, data) -> {
-            registerNavigationReceived.set(true);
-        });
+        GameEventManager.getInstance().subscribe(GameEventType.NAVIGATE_TO_LOGIN, (eventType, data) -> registerNavigationReceived.set(true));
 
         registerView.getRegisterButton().doClick();
         assertTrue(registerNavigationReceived.get());
@@ -129,13 +123,9 @@ class AuthenticationFlowIntegrationTest {
         AtomicBoolean loginEventReceived = new AtomicBoolean(false);
         AtomicBoolean homeNavigationReceived = new AtomicBoolean(false);
 
-        GameEventManager.getInstance().subscribe(GameEventType.PLAYER_LOGGED_IN, (eventType, data) -> {
-            loginEventReceived.set(true);
-        });
+        GameEventManager.getInstance().subscribe(GameEventType.PLAYER_LOGGED_IN, (eventType, data) -> loginEventReceived.set(true));
 
-        GameEventManager.getInstance().subscribe(GameEventType.NAVIGATE_TO_HOME, (eventType, data) -> {
-            homeNavigationReceived.set(true);
-        });
+        GameEventManager.getInstance().subscribe(GameEventType.NAVIGATE_TO_HOME, (eventType, data) -> homeNavigationReceived.set(true));
 
         loginView.getLoginButton().doClick();
         assertTrue(loginEventReceived.get());
@@ -146,9 +136,7 @@ class AuthenticationFlowIntegrationTest {
         HomeGUI homeView = new HomeGUI();
         AtomicBoolean gameNavigationReceived = new AtomicBoolean(false);
 
-        GameEventManager.getInstance().subscribe(GameEventType.NAVIGATE_TO_GAME, (eventType, data) -> {
-            gameNavigationReceived.set(true);
-        });
+        GameEventManager.getInstance().subscribe(GameEventType.NAVIGATE_TO_GAME, (eventType, data) -> gameNavigationReceived.set(true));
 
         homeView.getStartGameButton().doClick();
         assertTrue(gameNavigationReceived.get());
@@ -163,17 +151,11 @@ class AuthenticationFlowIntegrationTest {
         AtomicInteger subscriber2Count = new AtomicInteger(0);
         AtomicInteger subscriber3Count = new AtomicInteger(0);
 
-        GameEventManager.getInstance().subscribe(GameEventType.NAVIGATE_TO_LOGIN, (eventType, data) -> {
-            subscriber1Count.incrementAndGet();
-        });
+        GameEventManager.getInstance().subscribe(GameEventType.NAVIGATE_TO_LOGIN, (eventType, data) -> subscriber1Count.incrementAndGet());
 
-        GameEventManager.getInstance().subscribe(GameEventType.NAVIGATE_TO_LOGIN, (eventType, data) -> {
-            subscriber2Count.incrementAndGet();
-        });
+        GameEventManager.getInstance().subscribe(GameEventType.NAVIGATE_TO_LOGIN, (eventType, data) -> subscriber2Count.incrementAndGet());
 
-        GameEventManager.getInstance().subscribe(GameEventType.NAVIGATE_TO_LOGIN, (eventType, data) -> {
-            subscriber3Count.incrementAndGet();
-        });
+        GameEventManager.getInstance().subscribe(GameEventType.NAVIGATE_TO_LOGIN, (eventType, data) -> subscriber3Count.incrementAndGet());
 
         RegisterGUI registerView = new RegisterGUI();
         GUITestHelper.setTextField(registerView, "usernameField", "eventTest");

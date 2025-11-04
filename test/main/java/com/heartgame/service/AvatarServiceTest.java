@@ -11,7 +11,6 @@ import static org.junit.jupiter.api.Assertions.*;
  * Tests for AvatarService
  * Uses test subclass to mock HTTP responses (KISS approach)
  * Tests URL encoding, null handling, and JSON metadata fetching
- *
  * Note: fetchAvatar() tests are limited to validation logic since it directly
  * calls HTTPClient.getStream() which would require real HTTP calls or complex mocking.
  * fetchAvatarMetadata() is fully testable via fetchData() override.
@@ -62,7 +61,7 @@ class AvatarServiceTest {
         String mockJson = "{\"svg\":\"<svg>...</svg>\"}";
         service.setMockResponse(mockJson);
 
-        String result = service.fetchAvatarMetadata("testuser");
+        String result = service.fetchAvatarMetadata("testUser");
 
         assertNotNull(result, "Should return JSON metadata");
         assertEquals(mockJson, result, "Should return the mock JSON");
@@ -129,7 +128,7 @@ class AvatarServiceTest {
     void testFetchAvatarMetadataIOException() {
         service.setMockException(new IOException("Network error"));
 
-        String result = service.fetchAvatarMetadata("testuser");
+        String result = service.fetchAvatarMetadata("testUser");
 
         assertNull(result, "Should return null on IOException");
     }
@@ -140,7 +139,7 @@ class AvatarServiceTest {
     void testFetchAvatarMetadataEmptyResponse() {
         service.setMockResponse("");
 
-        String result = service.fetchAvatarMetadata("testuser");
+        String result = service.fetchAvatarMetadata("testUser");
 
         assertNotNull(result, "Should return empty string (not null)");
         assertEquals("", result);
@@ -152,7 +151,7 @@ class AvatarServiceTest {
     void testFetchAvatarMetadataNullResponse() {
         service.setMockResponse(null);
 
-        String result = service.fetchAvatarMetadata("testuser");
+        String result = service.fetchAvatarMetadata("testUser");
 
         assertNull(result, "Should return null if API returns null");
     }
@@ -164,7 +163,7 @@ class AvatarServiceTest {
         String complexJson = """
             {
                 "svg": "<svg>...</svg>",
-                "seed": "testuser",
+                "seed": "testUser",
                 "version": "7.x",
                 "metadata": {
                     "colors": ["#FF0000", "#00FF00"]
@@ -173,10 +172,10 @@ class AvatarServiceTest {
             """;
         service.setMockResponse(complexJson);
 
-        String result = service.fetchAvatarMetadata("testuser");
+        String result = service.fetchAvatarMetadata("testUser");
 
         assertNotNull(result);
-        assertTrue(result.contains("testuser"), "Should contain username");
+        assertTrue(result.contains("testUser"), "Should contain username");
         assertTrue(result.contains("svg"), "Should contain svg data");
     }
 
@@ -258,11 +257,11 @@ class AvatarServiceTest {
     @Order(15)
     @DisplayName("fetchAvatarMetadata is deterministic for same username")
     void testFetchAvatarMetadataDeterministic() {
-        String mockJson = "{\"seed\":\"testuser\"}";
+        String mockJson = "{\"seed\":\"testUser\"}";
         service.setMockResponse(mockJson);
 
-        String result1 = service.fetchAvatarMetadata("testuser");
-        String result2 = service.fetchAvatarMetadata("testuser");
+        String result1 = service.fetchAvatarMetadata("testUser");
+        String result2 = service.fetchAvatarMetadata("testUser");
 
         assertEquals(result1, result2, "Same username should return same result (deterministic)");
     }
@@ -297,14 +296,14 @@ class AvatarServiceTest {
     @Order(18)
     @DisplayName("fetchAvatar and fetchAvatarMetadata handle same username consistently")
     void testFetchAvatarAndMetadataConsistency() {
-        service.setMockResponse("{\"seed\":\"testuser\"}");
+        service.setMockResponse("{\"seed\":\"testUser\"}");
 
-        String metadata = service.fetchAvatarMetadata("testuser");
-        BufferedImage avatar = service.fetchAvatar("testuser");
+        String metadata = service.fetchAvatarMetadata("testUser");
+        BufferedImage avatar = service.fetchAvatar("testUser");
 
         // Both should handle the same username
         assertNotNull(metadata, "Metadata should be fetched");
-        // Avatar returns null because we can't mock HTTPClient.getStream easily
+        // Avatar returns null because we can't mock HTTPClient.getStream easily,
         // but it should not throw exceptions
     }
 

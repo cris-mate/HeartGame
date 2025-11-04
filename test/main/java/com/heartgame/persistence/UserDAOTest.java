@@ -50,15 +50,15 @@ class UserDAOTest {
     @DisplayName("findByUsername() returns user when exists")
     void testFindByUsernameFound() {
         // Arrange: Create a user
-        User user = new User("testuser");
+        User user = new User("testUser");
         userDAO.createUser(user, "password123");
 
         // Act
-        Optional<User> result = userDAO.findByUsername("testuser");
+        Optional<User> result = userDAO.findByUsername("testUser");
 
         // Assert
         assertTrue(result.isPresent(), "Should find existing user");
-        assertEquals("testuser", result.get().getUsername());
+        assertEquals("testUser", result.get().getUsername());
     }
 
     @Test
@@ -68,7 +68,7 @@ class UserDAOTest {
         User user = new User("TestUser");
         userDAO.createUser(user, "password123");
 
-        Optional<User> result = userDAO.findByUsername("testuser");
+        Optional<User> result = userDAO.findByUsername("testUser");
 
         assertTrue(result.isEmpty(), "Should not find user with different case");
     }
@@ -136,14 +136,14 @@ class UserDAOTest {
     @Order(8)
     @DisplayName("createUser() creates password-based user successfully")
     void testCreatePasswordUser() {
-        User user = new User("newuser");
-        boolean result = userDAO.createUser(user, "securepass123");
+        User user = new User("newUser");
+        boolean result = userDAO.createUser(user, "securePass123");
 
         assertTrue(result, "Should create user successfully");
         assertTrue(user.getId() > 0, "Should set generated ID");
 
         // Verify user was created
-        Optional<User> found = userDAO.findByUsername("newuser");
+        Optional<User> found = userDAO.findByUsername("newUser");
         assertTrue(found.isPresent(), "Created user should be findable");
     }
 
@@ -151,7 +151,7 @@ class UserDAOTest {
     @Order(9)
     @DisplayName("createUser() creates OAuth user successfully")
     void testCreateOAuthUser() {
-        User user = new User("oauthuser", "oauth@example.com", "google", "goog456");
+        User user = new User("oauthUser", "oauth@example.com", "google", "goog456");
         boolean result = userDAO.createUser(user, null);
 
         assertTrue(result, "Should create OAuth user");
@@ -175,12 +175,12 @@ class UserDAOTest {
     @Order(11)
     @DisplayName("createUser() hashes password correctly")
     void testCreateUserPasswordHashed() {
-        User user = new User("hashtest");
-        userDAO.createUser(user, "mypassword");
+        User user = new User("hashTest");
+        userDAO.createUser(user, "myPassword");
 
         // Password should be hashed, not stored in plain text
         // Verify by checking password verification works
-        boolean verified = userDAO.verifyPassword("hashtest", "mypassword");
+        boolean verified = userDAO.verifyPassword("hashTest", "myPassword");
         assertTrue(verified, "Should verify correct password");
     }
 
@@ -188,7 +188,7 @@ class UserDAOTest {
     @Order(12)
     @DisplayName("createUser() allows null password for OAuth users")
     void testCreateUserNullPasswordForOAuth() {
-        User user = new User("oauthonly", "oauth@test.com", "github", "gh999");
+        User user = new User("oauthOnly", "oauth@test.com", "github", "gh999");
         boolean result = userDAO.createUser(user, null);
 
         assertTrue(result, "Should create OAuth user with null password");
@@ -198,7 +198,7 @@ class UserDAOTest {
     @Order(13)
     @DisplayName("createUser() allows empty password for OAuth users")
     void testCreateUserEmptyPasswordForOAuth() {
-        User user = new User("oauthempty", "oauth2@test.com", "google", "g111");
+        User user = new User("oauthEmpty", "oauth2@test.com", "google", "g111");
         boolean result = userDAO.createUser(user, "");
 
         assertTrue(result, "Should create OAuth user with empty password");
@@ -210,10 +210,10 @@ class UserDAOTest {
     @Order(14)
     @DisplayName("verifyPassword() returns true for correct password")
     void testVerifyPasswordCorrect() {
-        User user = new User("passuser");
-        userDAO.createUser(user, "correctpass");
+        User user = new User("passUser");
+        userDAO.createUser(user, "correctPass");
 
-        boolean result = userDAO.verifyPassword("passuser", "correctpass");
+        boolean result = userDAO.verifyPassword("passUser", "correctPass");
 
         assertTrue(result, "Should verify correct password");
     }
@@ -222,10 +222,10 @@ class UserDAOTest {
     @Order(15)
     @DisplayName("verifyPassword() returns false for wrong password")
     void testVerifyPasswordWrong() {
-        User user = new User("passuser2");
-        userDAO.createUser(user, "correctpass");
+        User user = new User("passUser2");
+        userDAO.createUser(user, "correctPass");
 
-        boolean result = userDAO.verifyPassword("passuser2", "wrongpass");
+        boolean result = userDAO.verifyPassword("passUser2", "wrongPass");
 
         assertFalse(result, "Should reject wrong password");
     }
@@ -234,7 +234,7 @@ class UserDAOTest {
     @Order(16)
     @DisplayName("verifyPassword() returns false for non-existent user")
     void testVerifyPasswordNonExistentUser() {
-        boolean result = userDAO.verifyPassword("ghost", "anypassword");
+        boolean result = userDAO.verifyPassword("ghost", "anyPassword");
 
         assertFalse(result, "Should return false for non-existent user");
     }
@@ -243,10 +243,10 @@ class UserDAOTest {
     @Order(17)
     @DisplayName("verifyPassword() returns false for OAuth user (no password)")
     void testVerifyPasswordOAuthUser() {
-        User user = new User("oauthonly2", "oauth@test.com", "google", "g222");
+        User user = new User("oauthOnly2", "oauth@test.com", "google", "g222");
         userDAO.createUser(user, null);
 
-        boolean result = userDAO.verifyPassword("oauthonly2", "anypassword");
+        boolean result = userDAO.verifyPassword("oauthOnly2", "anyPassword");
 
         assertFalse(result, "OAuth users should not verify with password");
     }
@@ -255,10 +255,10 @@ class UserDAOTest {
     @Order(18)
     @DisplayName("verifyPassword() is case-sensitive for password")
     void testVerifyPasswordCaseSensitive() {
-        User user = new User("caseuser");
+        User user = new User("caseUser");
         userDAO.createUser(user, "Password123");
 
-        boolean result = userDAO.verifyPassword("caseuser", "password123");
+        boolean result = userDAO.verifyPassword("caseUser", "password123");
 
         assertFalse(result, "Password verification should be case-sensitive");
     }
@@ -293,15 +293,15 @@ class UserDAOTest {
     @DisplayName("updateLastLogin() updates timestamp successfully")
     void testUpdateLastLogin() throws SQLException {
         // Create user
-        User user = new User("loginuser");
+        User user = new User("loginUser");
         userDAO.createUser(user, "pass");
 
         // Update last login
-        userDAO.updateLastLogin("loginuser");
+        userDAO.updateLastLogin("loginUser");
 
         // Verify last_login was set (check database directly)
         var stmt = connection.createStatement();
-        var rs = stmt.executeQuery("SELECT last_login FROM users WHERE username = 'loginuser'");
+        var rs = stmt.executeQuery("SELECT last_login FROM users WHERE username = 'loginUser'");
         assertTrue(rs.next(), "User should exist");
         assertNotNull(rs.getTimestamp("last_login"), "last_login should be set");
         rs.close();
@@ -312,13 +312,13 @@ class UserDAOTest {
     @Order(22)
     @DisplayName("updateLastLogin() can be called multiple times")
     void testUpdateLastLoginMultipleTimes() {
-        User user = new User("multilogin");
+        User user = new User("multiLogin");
         userDAO.createUser(user, "pass");
 
         assertDoesNotThrow(() -> {
-            userDAO.updateLastLogin("multilogin");
-            userDAO.updateLastLogin("multilogin");
-            userDAO.updateLastLogin("multilogin");
+            userDAO.updateLastLogin("multiLogin");
+            userDAO.updateLastLogin("multiLogin");
+            userDAO.updateLastLogin("multiLogin");
         }, "Should handle multiple login updates");
     }
 
@@ -326,9 +326,7 @@ class UserDAOTest {
     @Order(23)
     @DisplayName("updateLastLogin() handles non-existent user gracefully")
     void testUpdateLastLoginNonExistentUser() {
-        assertDoesNotThrow(() -> {
-            userDAO.updateLastLogin("ghost");
-        }, "Should not throw for non-existent user");
+        assertDoesNotThrow(() -> userDAO.updateLastLogin("ghost"), "Should not throw for non-existent user");
     }
 
     // ==================== Integration Tests (Testing BaseDAO) ====================
@@ -338,13 +336,13 @@ class UserDAOTest {
     @DisplayName("Transaction rollback on createUser failure")
     void testTransactionRollback() throws SQLException {
         // Create first user
-        User user1 = new User("txuser");
+        User user1 = new User("txUser");
         userDAO.createUser(user1, "pass");
 
         int countBefore = DatabaseTestHelper.countRows(connection, "users");
 
         // Try to create duplicate (should fail and rollback)
-        User user2 = new User("txuser");
+        User user2 = new User("txUser");
         boolean result = userDAO.createUser(user2, "pass2");
 
         int countAfter = DatabaseTestHelper.countRows(connection, "users");
@@ -396,14 +394,14 @@ class UserDAOTest {
     @Order(27)
     @DisplayName("Mixed OAuth and password users coexist")
     void testMixedUserTypes() {
-        User passwordUser = new User("passuser");
-        User oauthUser = new User("oauthuser", "oauth@test.com", "google", "g999");
+        User passwordUser = new User("passUser");
+        User oauthUser = new User("oauthUser", "oauth@test.com", "google", "g999");
 
         assertTrue(userDAO.createUser(passwordUser, "password"));
         assertTrue(userDAO.createUser(oauthUser, null));
 
-        assertTrue(userDAO.verifyPassword("passuser", "password"));
-        assertFalse(userDAO.verifyPassword("oauthuser", "password"));
+        assertTrue(userDAO.verifyPassword("passUser", "password"));
+        assertFalse(userDAO.verifyPassword("oauthUser", "password"));
 
         Optional<User> oauthFound = userDAO.findByOAuthId("google", "g999");
         assertTrue(oauthFound.isPresent());
@@ -424,20 +422,20 @@ class UserDAOTest {
     @Order(29)
     @DisplayName("User with special characters in password")
     void testSpecialCharactersInPassword() {
-        User user = new User("specialpass");
+        User user = new User("specialPass");
         String password = "p@ssw0rd!#$%";
         userDAO.createUser(user, password);
 
-        assertTrue(userDAO.verifyPassword("specialpass", password));
-        assertFalse(userDAO.verifyPassword("specialpass", "wrongpass"));
+        assertTrue(userDAO.verifyPassword("specialPass", password));
+        assertFalse(userDAO.verifyPassword("specialPass", "wrongPass"));
     }
 
     @Test
     @Order(30)
     @DisplayName("Null and empty email handling")
     void testNullAndEmptyEmail() {
-        User user1 = new User("nullemail", null, "google", "g123");
-        User user2 = new User("emptyemail", "", "google", "g456");
+        User user1 = new User("nullEmail", null, "google", "g123");
+        User user2 = new User("emptyEmail", "", "google", "g456");
 
         assertTrue(userDAO.createUser(user1, null));
         assertTrue(userDAO.createUser(user2, null));

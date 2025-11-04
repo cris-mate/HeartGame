@@ -11,7 +11,6 @@ import javax.swing.border.Border;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
-import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
@@ -50,13 +49,13 @@ public class LeaderboardGUI extends JFrame {
     public LeaderboardGUI() {
         super("Leaderboard - HeartGame");
 
-        setSize(900, 680);
+        setSize(860, 680);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         // Main panel
         JPanel mainPanel = new JPanel(new BorderLayout(20, 20));
-        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 40, 20, 40));
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
         mainPanel.setBackground(new Color(240, 240, 240));
 
         // ========== TOP PANEL: Title ==========
@@ -75,7 +74,7 @@ public class LeaderboardGUI extends JFrame {
         JPanel centerPanel = new JPanel(new BorderLayout(10, 10));
         centerPanel.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(new Color(200, 200, 200), 2),
-                BorderFactory.createEmptyBorder(20, 40, 20, 40)
+                BorderFactory.createEmptyBorder(15, 15, 15, 15)
         ));
         centerPanel.setBackground(Color.WHITE);
         centerPanel.setOpaque(true);
@@ -124,15 +123,7 @@ public class LeaderboardGUI extends JFrame {
         leaderboardTable.getColumnModel().getColumn(3).setPreferredWidth(80);  // Score
         leaderboardTable.getColumnModel().getColumn(4).setPreferredWidth(200); // Date
 
-        // Center align rank and score columns
-        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
-        centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
-        leaderboardTable.getColumnModel().getColumn(0).setCellRenderer(centerRenderer); // Rank
-        leaderboardTable.getColumnModel().getColumn(2).setCellRenderer(centerRenderer); // Player
-        leaderboardTable.getColumnModel().getColumn(3).setCellRenderer(centerRenderer); // Score
-        leaderboardTable.getColumnModel().getColumn(4).setCellRenderer(centerRenderer); // Date
-
-        // Avatar column renderer (center-aligned)
+        // Avatar column renderer
         leaderboardTable.getColumnModel().getColumn(1).setCellRenderer(new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value,
@@ -145,6 +136,19 @@ public class LeaderboardGUI extends JFrame {
                 } else {
                     label.setText("...");
                 }
+
+                // Get username from the 'Player' column
+                String username = (String) table.getValueAt(row, 2);
+                User currentUser = UserSession.getInstance().getCurrentUser();
+                if (currentUser != null && username.equals(currentUser.getUsername())) {
+                    label.setBackground(new Color(255, 243, 205)); // Light yellow
+                    label.setFont(label.getFont().deriveFont(Font.BOLD));
+                } else {
+                    label.setBackground(Color.WHITE); // Default
+                    label.setFont(label.getFont().deriveFont(Font.PLAIN));
+                }
+                label.setOpaque(true);
+
                 return label;
             }
         });
@@ -165,7 +169,7 @@ public class LeaderboardGUI extends JFrame {
 
         // ========== BOTTOM PANEL: Buttons ==========
         JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 5));
-        bottomPanel.setBackground(new Color(248, 249, 250));
+        bottomPanel.setBackground(new Color(240, 240, 240));
 
         // --- Control Button Styling ---
         Color controlBackground = new Color(230, 230, 230);

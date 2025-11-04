@@ -22,7 +22,6 @@ public class HeartGameApplication {
     public static void main(String[] args) {
         logger.info("Starting Heart Game Application...");
 
-        // Set system look and feel for better native integration
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
             logger.debug("System look and feel set successfully");
@@ -33,11 +32,10 @@ public class HeartGameApplication {
         // Launch application on Swing EDT
         SwingUtilities.invokeLater(() -> {
             try {
-                // Initialize navigation controller
                 NavigationController navigationController = NavigationController.getInstance();
                 logger.info("NavigationController initialized");
 
-                // Create and display login screen
+
                 LoginGUI loginGUI = new LoginGUI();
                 navigationController.setCurrentWindow(loginGUI);
 

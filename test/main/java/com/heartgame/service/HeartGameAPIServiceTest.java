@@ -145,9 +145,7 @@ class HeartGameAPIServiceTest {
     void testGetNewQuestionNullResponse() {
         service.setMockResponse(null);
 
-        IOException exception = assertThrows(IOException.class, () -> {
-            service.getNewQuestion();
-        });
+        IOException exception = assertThrows(IOException.class, () -> service.getNewQuestion());
 
         assertTrue(exception.getMessage().contains("Empty or null"),
                 "Should mention empty/null in error message");
@@ -159,9 +157,7 @@ class HeartGameAPIServiceTest {
     void testGetNewQuestionEmptyResponse() {
         service.setMockResponse("");
 
-        IOException exception = assertThrows(IOException.class, () -> {
-            service.getNewQuestion();
-        });
+        IOException exception = assertThrows(IOException.class, () -> service.getNewQuestion());
 
         assertTrue(exception.getMessage().contains("Empty or null"));
     }
@@ -172,9 +168,7 @@ class HeartGameAPIServiceTest {
     void testGetNewQuestionBlankResponse() {
         service.setMockResponse("   ");
 
-        IOException exception = assertThrows(IOException.class, () -> {
-            service.getNewQuestion();
-        });
+        IOException exception = assertThrows(IOException.class, () -> service.getNewQuestion());
 
         assertTrue(exception.getMessage().contains("Empty or null"));
     }
@@ -188,9 +182,7 @@ class HeartGameAPIServiceTest {
         String base64Image = createValidBase64Image();
         service.setMockResponse(base64Image + "5"); // No comma
 
-        IOException exception = assertThrows(IOException.class, () -> {
-            service.getNewQuestion();
-        });
+        IOException exception = assertThrows(IOException.class, () -> service.getNewQuestion());
 
         assertTrue(exception.getMessage().contains("format"),
                 "Should mention format in error message");
@@ -203,9 +195,7 @@ class HeartGameAPIServiceTest {
         String base64Image = createValidBase64Image();
         service.setMockResponse(base64Image + ","); // Comma but no solution
 
-        assertThrows(IOException.class, () -> {
-            service.getNewQuestion();
-        }, "Should throw for missing solution");
+        assertThrows(IOException.class, () -> service.getNewQuestion(), "Should throw for missing solution");
     }
 
     @Test
@@ -214,9 +204,7 @@ class HeartGameAPIServiceTest {
     void testGetNewQuestionOnlyComma() {
         service.setMockResponse(",");
 
-        assertThrows(IOException.class, () -> {
-            service.getNewQuestion();
-        }, "Should throw for only comma");
+        assertThrows(IOException.class, () -> service.getNewQuestion(), "Should throw for only comma");
     }
 
     // ==================== Error Cases: Invalid Base64 ====================
@@ -227,9 +215,7 @@ class HeartGameAPIServiceTest {
     void testGetNewQuestionInvalidBase64() {
         service.setMockResponse("notValidBase64!!!,5");
 
-        assertThrows(IOException.class, () -> {
-            service.getNewQuestion();
-        }, "Should throw for invalid base64");
+        assertThrows(IOException.class, () -> service.getNewQuestion(), "Should throw for invalid base64");
     }
 
     @Test
@@ -240,9 +226,7 @@ class HeartGameAPIServiceTest {
         String notAnImage = Base64.getEncoder().encodeToString("Hello World".getBytes());
         service.setMockResponse(notAnImage + ",5");
 
-        IOException exception = assertThrows(IOException.class, () -> {
-            service.getNewQuestion();
-        });
+        IOException exception = assertThrows(IOException.class, () -> service.getNewQuestion());
 
         assertTrue(exception.getMessage().contains("could not be decoded"));
     }
@@ -256,9 +240,7 @@ class HeartGameAPIServiceTest {
         String base64Image = createValidBase64Image();
         service.setMockResponse(base64Image + ",abc");
 
-        IOException exception = assertThrows(IOException.class, () -> {
-            service.getNewQuestion();
-        });
+        IOException exception = assertThrows(IOException.class, () -> service.getNewQuestion());
 
         assertTrue(exception.getMessage().contains("Invalid solution format"));
     }
@@ -270,9 +252,7 @@ class HeartGameAPIServiceTest {
         String base64Image = createValidBase64Image();
         service.setMockResponse(base64Image + ",-1");
 
-        assertThrows(Exception.class, () -> {
-            service.getNewQuestion();
-        }, "Should reject negative solution");
+        assertThrows(Exception.class, () -> service.getNewQuestion(), "Should reject negative solution");
     }
 
     @Test
@@ -282,9 +262,7 @@ class HeartGameAPIServiceTest {
         String base64Image = createValidBase64Image();
         service.setMockResponse(base64Image + ",10");
 
-        assertThrows(Exception.class, () -> {
-            service.getNewQuestion();
-        }, "Should reject solution > 9");
+        assertThrows(Exception.class, () -> service.getNewQuestion(), "Should reject solution > 9");
     }
 
     @Test
@@ -294,9 +272,7 @@ class HeartGameAPIServiceTest {
         String base64Image = createValidBase64Image();
         service.setMockResponse(base64Image + ",100");
 
-        assertThrows(Exception.class, () -> {
-            service.getNewQuestion();
-        }, "Should reject solution = 100");
+        assertThrows(Exception.class, () -> service.getNewQuestion(), "Should reject solution = 100");
     }
 
     @Test
@@ -306,9 +282,7 @@ class HeartGameAPIServiceTest {
         String base64Image = createValidBase64Image();
         service.setMockResponse(base64Image + ",5.5");
 
-        assertThrows(IOException.class, () -> {
-            service.getNewQuestion();
-        }, "Should reject decimal solution");
+        assertThrows(IOException.class, () -> service.getNewQuestion(), "Should reject decimal solution");
     }
 
     // ==================== Error Cases: Network Errors ====================
@@ -319,9 +293,7 @@ class HeartGameAPIServiceTest {
     void testGetNewQuestionNetworkError() {
         service.setMockException(new IOException("Network timeout"));
 
-        IOException exception = assertThrows(IOException.class, () -> {
-            service.getNewQuestion();
-        });
+        IOException exception = assertThrows(IOException.class, () -> service.getNewQuestion());
 
         assertTrue(exception.getMessage().contains("Failed to read or parse"));
     }
@@ -332,9 +304,7 @@ class HeartGameAPIServiceTest {
     void testGetNewQuestionIOExceptionNullMessage() {
         service.setMockException(new IOException((String) null));
 
-        assertThrows(IOException.class, () -> {
-            service.getNewQuestion();
-        }, "Should handle IOException with null message");
+        assertThrows(IOException.class, () -> service.getNewQuestion(), "Should handle IOException with null message");
     }
 
     // ==================== Edge Cases ====================
@@ -404,9 +374,7 @@ class HeartGameAPIServiceTest {
 
         for (int invalid : invalidSolutions) {
             service.setMockResponse(base64Image + "," + invalid);
-            assertThrows(Exception.class, () -> {
-                service.getNewQuestion();
-            }, "Should reject solution " + invalid);
+            assertThrows(Exception.class, () -> service.getNewQuestion(), "Should reject solution " + invalid);
         }
     }
 }

@@ -193,7 +193,7 @@ class AuthenticationServiceTest {
     @Test
     @DisplayName("Should validate password exceeding minimum length")
     void testIsPasswordValid_ExceedsMinimumLength() {
-        String validPassword = "verylongpassword123";
+        String validPassword = "veryLongPassword123";
         int minLength = 8;
 
         boolean result = authService.isPasswordValid(validPassword, minLength);

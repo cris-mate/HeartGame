@@ -9,11 +9,9 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Tests for GoogleAuthService
  * Tests helper methods and username generation logic (KISS approach)
- *
  * Note: Full OAuth flow testing (authenticateUser, waitForCallback, etc.)
  * would require complex mocking of HTTP servers, browser interaction, and OAuth endpoints.
  * These integration tests should be performed separately or manually.
- *
  * This test suite focuses on the testable utility methods via reflection.
  */
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -38,7 +36,7 @@ class GoogleAuthServiceTest {
 
         String result = (String) method.invoke(service, "john.doe@example.com", "John Doe", "12345");
 
-        assertEquals("johndoe", result, "Should use email prefix without special chars");
+        assertEquals("johnDoe", result, "Should use email prefix without special chars");
     }
 
     @Test
@@ -64,7 +62,7 @@ class GoogleAuthServiceTest {
 
         String result = (String) method.invoke(service, "JOHN.DOE@EXAMPLE.COM", null, "12345");
 
-        assertEquals("johndoe", result, "Should convert to lowercase");
+        assertEquals("johnDoe", result, "Should convert to lowercase");
     }
 
     @Test
@@ -77,7 +75,7 @@ class GoogleAuthServiceTest {
 
         String result = (String) method.invoke(service, null, "John Doe", "12345");
 
-        assertEquals("johndoe", result, "Should use name without spaces");
+        assertEquals("johnDoe", result, "Should use name without spaces");
     }
 
     @Test
@@ -90,7 +88,7 @@ class GoogleAuthServiceTest {
 
         String result = (String) method.invoke(service, "", "Alice Smith", "12345");
 
-        assertEquals("alicesmith", result, "Should use name when email is empty");
+        assertEquals("aliceSmith", result, "Should use name when email is empty");
     }
 
     @Test
@@ -103,7 +101,7 @@ class GoogleAuthServiceTest {
 
         String result = (String) method.invoke(service, null, "John Middle Doe", "12345");
 
-        assertEquals("johnmiddledoe", result, "Should remove all spaces");
+        assertEquals("johnMiddleDoe", result, "Should remove all spaces");
     }
 
     @Test
@@ -116,7 +114,7 @@ class GoogleAuthServiceTest {
 
         String result = (String) method.invoke(service, null, "Jean-Paul O'Connor", "12345");
 
-        assertEquals("jeanpauloconnor", result, "Should remove hyphens and apostrophes");
+        assertEquals("jeanPaulOConnor", result, "Should remove hyphens and apostrophes");
     }
 
     @Test
@@ -326,7 +324,7 @@ class GoogleAuthServiceTest {
 
         String result = (String) method.invoke(service, null, "John Doe 42", "12345");
 
-        assertEquals("johndoe42", result, "Should preserve numbers in name");
+        assertEquals("johnDoe42", result, "Should preserve numbers in name");
     }
 
     @Test
