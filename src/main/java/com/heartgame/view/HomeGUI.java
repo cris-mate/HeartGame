@@ -9,7 +9,6 @@ import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.Serial;
 
 /**
  * The home screen view displayed after successful login
@@ -17,9 +16,6 @@ import java.io.Serial;
  * Displays user avatar fetched asynchronously
  */
 public class HomeGUI extends JFrame {
-
-    @Serial
-    private static final long serialVersionUID = 8394756201928374650L;
 
     private final JButton startGameButton = new JButton("Start Game");
     private final JButton leaderboardButton = new JButton("Leaderboard");

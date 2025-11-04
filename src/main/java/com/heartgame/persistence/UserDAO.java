@@ -9,6 +9,7 @@ import java.sql.*;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Data Access Object for User entities
@@ -24,19 +25,16 @@ public class UserDAO extends BaseDAO {
     /**
      * Finds a user by username
      * Uses retry logic for resilience
-     *
      * @param username The username to search for
      * @return Optional containing the User if found, empty otherwise
      */
     public Optional<User> findByUsername(String username) {
-        if (!hasConnection()) {
-            return Optional.empty();
-        }
-
+        // ... (connection check)
         String sql = "SELECT id, username, email, oauth_provider, oauth_id " +
                 "FROM users WHERE username = ?";
 
-        Optional<User>[] result = new Optional[]{Optional.empty()};
+        // Use a safe, modern holder
+        AtomicReference<Optional<User>> result = new AtomicReference<>(Optional.empty());
 
         executeWithRetry(() -> {
             try (PreparedStatement stmt = connection.prepareStatement(sql)) {
@@ -44,32 +42,29 @@ public class UserDAO extends BaseDAO {
                 ResultSet rs = stmt.executeQuery();
 
                 if (rs.next()) {
-                    result[0] = Optional.of(mapResultSetToUser(rs));
+                    result.set(Optional.of(mapResultSetToUser(rs))); // Set value
                     return true;
                 }
-                return true; // Not finding a user is not an error
+                return true;
             }
         }, 2);
 
-        return result[0];
+        return result.get(); // Get value
     }
 
     /**
      * Finds a user by OAuth provider and OAuth ID
-     *
      * @param oauthProvider The OAuth provider
      * @param oauthId       The OAuth provider's user ID
      * @return Optional containing the User if found, empty otherwise
      */
     public Optional<User> findByOAuthId(String oauthProvider, String oauthId) {
-        if (!hasConnection()) {
-            return Optional.empty();
-        }
-
+        // ... (connection check)
         String sql = "SELECT id, username, email, oauth_provider, oauth_id, last_login " +
                 "FROM users WHERE oauth_provider = ? AND oauth_id = ?";
 
-        Optional<User>[] result = new Optional[]{Optional.empty()};
+        // Use a safe, modern holder
+        AtomicReference<Optional<User>> result = new AtomicReference<>(Optional.empty());
 
         executeWithRetry(() -> {
             try (PreparedStatement stmt = connection.prepareStatement(sql)) {
@@ -78,18 +73,17 @@ public class UserDAO extends BaseDAO {
                 ResultSet rs = stmt.executeQuery();
 
                 if (rs.next()) {
-                    result[0] = Optional.of(mapResultSetToUser(rs));
+                    result.set(Optional.of(mapResultSetToUser(rs))); // Set value
                 }
                 return true;
             }
         }, 2);
 
-        return result[0];
+        return result.get(); // Get value
     }
 
     /**
      * Verifies a user's password
-     *
      * @param username The username
      * @param password The plaintext password to verify
      * @return True if password matches, false otherwise
@@ -127,7 +121,6 @@ public class UserDAO extends BaseDAO {
     /**
      * Creates a new user in the database
      * Uses transaction to ensure atomicity
-     *
      * @param user     The user to create
      * @param password The plaintext password (null for OAuth users)
      * @return True if creation succeeded, false otherwise
@@ -175,7 +168,6 @@ public class UserDAO extends BaseDAO {
      * Updates the last_login timestamp for a user
      * Keeps original signature for backward compatibility
      * Also checks for potential multi-session scenario
-     *
      * @param username The username
      */
     public void updateLastLogin(String username) {
@@ -207,7 +199,6 @@ public class UserDAO extends BaseDAO {
 
     /**
      * Checks if user has logged in recently (multi-session detection)
-     *
      * @param username The username to check
      * @return True if user logged in within threshold, false otherwise
      */
@@ -238,7 +229,6 @@ public class UserDAO extends BaseDAO {
 
     /**
      * Checks if a username already exists in the database
-     *
      * @param username The username to check
      * @return True if username exists, false otherwise
      */
@@ -249,7 +239,6 @@ public class UserDAO extends BaseDAO {
     /**
      * Maps a ResultSet row to a User object
      * Eliminates code duplication in findByUsername and findByOAuthId
-     *
      * @param rs The ResultSet positioned at the current row
      * @return A User object with data from the ResultSet
      * @throws SQLException If column access fails

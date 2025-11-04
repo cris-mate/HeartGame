@@ -1,13 +1,10 @@
 package com.heartgame.view;
 
 import com.heartgame.controller.RegisterController;
-import com.heartgame.event.GameEventManager;
-import com.heartgame.event.GameEventType;
 
 import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
-import java.io.Serial;
 
 /**
  * The view for the registration screen
@@ -16,21 +13,12 @@ import java.io.Serial;
  */
 public class RegisterGUI extends JFrame {
 
-    @Serial
-    private static final long serialVersionUID = -3847562190845701L;
-
     private final JButton registerButton = new JButton("Create Account");
     private final JButton backToLoginButton = new JButton("Back to Login");
     private final JTextField usernameField = new JTextField(15);
     private final JTextField emailField = new JTextField(15);
     private final JPasswordField passwordField = new JPasswordField(15);
     private final JPasswordField confirmPasswordField = new JPasswordField(15);
-
-    private final JLabel titleLabel = new JLabel("Create New Account");
-    private final JLabel usernameLabel = new JLabel("Username:");
-    private final JLabel emailLabel = new JLabel("Email:");
-    private final JLabel passwordLabel = new JLabel("Password:");
-    private final JLabel confirmPasswordLabel = new JLabel("Confirm Password:");
 
     /**
      * Constructs the registration GUI, initializes all UI components,
@@ -46,24 +34,29 @@ public class RegisterGUI extends JFrame {
         panel.setLayout(null);
 
         // Title
+        JLabel titleLabel = new JLabel("Create New Account");
         titleLabel.setBounds(100, 20, 200, 25);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 18));
         titleLabel.setForeground(new Color(220, 53, 69));
         titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
 
         // Username
+        JLabel usernameLabel = new JLabel("Username:");
         usernameLabel.setBounds(50, 75, 120, 20);
         usernameField.setBounds(180, 75, 170, 25);
 
         // Email
+        JLabel emailLabel = new JLabel("Email:");
         emailLabel.setBounds(50, 110, 120, 20);
         emailField.setBounds(180, 110, 170, 25);
 
         // Password
+        JLabel passwordLabel = new JLabel("Password:");
         passwordLabel.setBounds(50, 145, 120, 20);
         passwordField.setBounds(180, 145, 170, 25);
 
         // Confirm Password
+        JLabel confirmPasswordLabel = new JLabel("Confirm Password:");
         confirmPasswordLabel.setBounds(50, 180, 120, 20);
         confirmPasswordField.setBounds(180, 180, 170, 25);
 

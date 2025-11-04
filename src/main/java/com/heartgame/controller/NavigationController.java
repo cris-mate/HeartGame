@@ -146,14 +146,6 @@ public class NavigationController implements GameEventListener {
     }
 
     /**
-     * Gets the currently displayed window
-     * @return The current window, or null if none
-     */
-    public JFrame getCurrentWindow() {
-        return currentWindow;
-    }
-
-    /**
      * Sets the current window (used for initial application startup)
      * @param window The window to set as current
      */

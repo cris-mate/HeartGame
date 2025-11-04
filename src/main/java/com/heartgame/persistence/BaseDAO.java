@@ -171,7 +171,7 @@ public abstract class BaseDAO {
                 attempts++;
                 if (attempts <= maxRetries) {
                     logger.debug("Operation failed, retry {}/{}", attempts, maxRetries);
-                    Thread.sleep(100 * attempts); // Simple backoff
+                    Thread.sleep(100L * attempts); // Simple backoff
                 }
 
             } catch (SQLException e) {
@@ -183,7 +183,7 @@ public abstract class BaseDAO {
                     // Try to reconnect before retry
                     DatabaseManager.getInstance().reconnect();
                     try {
-                        Thread.sleep(100 * attempts);
+                        Thread.sleep(100L * attempts);
                     } catch (InterruptedException ie) {
                         Thread.currentThread().interrupt();
                         return false;

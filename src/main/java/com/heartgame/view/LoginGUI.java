@@ -7,7 +7,6 @@ import com.heartgame.event.GameEventType;
 import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
-import java.io.Serial;
 
 /**
  * The view for the login screen
@@ -16,16 +15,10 @@ import java.io.Serial;
  */
 public class LoginGUI extends JFrame {
 
-    @Serial
-    private static final long serialVersionUID = -6921462126880570161L;
-
     private final JButton loginButton = new JButton("Login");
     private final JButton googleLoginButton = new JButton("Sign in with Google");
-    private final JLabel usernameLabel = new JLabel("Username:");
     private final JTextField usernameField = new JTextField(15);
-    private final JLabel passwordLabel = new JLabel("Password:");
     private final JPasswordField passwordField = new JPasswordField(15);
-    private final JLabel titleLabel = new JLabel("Login into Heart Game");
     private final JButton registerButton = new JButton("Create Account");
 
     /**
@@ -42,16 +35,19 @@ public class LoginGUI extends JFrame {
         panel.setLayout(null);
 
         // Title
+        JLabel titleLabel = new JLabel("Login into Heart Game");
         titleLabel.setBounds(100, 20, 200, 25);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 18));
         titleLabel.setForeground(new Color(220, 53, 69));
         titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
 
         // Username
+        JLabel usernameLabel = new JLabel("Username:");
         usernameLabel.setBounds(80, 75, 120, 20);
         usernameField.setBounds(160, 75, 170, 25);
 
         // Password
+        JLabel passwordLabel = new JLabel("Password:");
         passwordLabel.setBounds(80, 110, 120, 20);
         passwordField.setBounds(160, 110, 170, 25);
 

@@ -33,7 +33,7 @@ public class GameTimer implements GameEventListener {
     }
 
     /**
-     * Handles game events to control timer behaviour
+     * Handles game events to control timer behavior
      * Starts timer when GAME_STARTED event is received
      * @param eventType The type of event that occurred
      * @param data Optional data associated with the event

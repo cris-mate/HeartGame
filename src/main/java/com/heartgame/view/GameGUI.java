@@ -11,7 +11,6 @@ import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.Serial;
 
 /**
  * The main view for the game screen
@@ -21,9 +20,6 @@ import java.io.Serial;
  * Includes pause/resume and stop game functionality
  */
 public class GameGUI extends JFrame {
-
-    @Serial
-    private static final long serialVersionUID = -107785653906635L;
 
     private final JLabel questArea = new JLabel();
     private final JLabel timerLabel = new JLabel("Starting Time: 60s");

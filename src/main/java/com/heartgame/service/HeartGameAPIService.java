@@ -69,7 +69,7 @@ public class HeartGameAPIService implements APIService {
                     throw new IllegalArgumentException("Solution out of expected range (0-9)");
                 }
             } catch (NumberFormatException e) {
-                logger.error("Unexpected solution format received from API: " + e.getMessage());
+                logger.error("Unexpected solution format received from API: {}", e.getMessage());
                 throw new IOException("Invalid solution format in API response", e);
             }
 

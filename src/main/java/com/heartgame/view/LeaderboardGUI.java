@@ -13,7 +13,6 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.Serial;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
@@ -26,9 +25,6 @@ import java.util.Map;
  * Avatars are loaded asynchronously with caching
  */
 public class LeaderboardGUI extends JFrame {
-
-    @Serial
-    private static final long serialVersionUID = 8273645192837465L;
 
     private final JButton backButton = new JButton("Back to Home");
     private final JButton refreshButton = new JButton("Refresh");

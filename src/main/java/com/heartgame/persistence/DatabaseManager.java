@@ -24,7 +24,6 @@ public final class DatabaseManager {
 
     // Connection validation settings
     private static final int VALIDATION_TIMEOUT_SECONDS = 2;
-    private static final String NO_CONNECTION_ERROR = "Cannot query database. No connection available.";
 
     private DatabaseManager() {
         this.dbProperties = loadDatabaseProperties();

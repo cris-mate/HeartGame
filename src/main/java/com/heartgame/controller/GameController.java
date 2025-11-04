@@ -23,9 +23,8 @@ import org.slf4j.LoggerFactory;
  * Controller for handling the main game logic
  * Publishes events based on user actions
  * Uses UserSession to access current user information
- * Listens to game events and updates view accordingly (proper MVC pattern)
- * Handles GAME_ENDED event published by GameTimer for cleanup
- * Saves game sessions to database for leaderboard
+ * Listens to game events and updates view accordingly
+ * Handles GAME_ENDED event published by GameTimer
  */
 public class GameController implements GameEventListener {
 
@@ -47,7 +46,7 @@ public class GameController implements GameEventListener {
      * Initializes services, links the controller to the view,
      * loads the first question and publishes the GAME_STARTED event
      * Uses UserSession to access the current authenticated user
-     * Subscribes to game events to update view (proper MVC pattern)
+     * Subscribes to game events to update view
      * @param gameView The game view it controls
      */
     public GameController(GameGUI gameView) {
