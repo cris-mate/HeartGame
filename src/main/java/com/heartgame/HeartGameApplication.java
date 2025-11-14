@@ -29,7 +29,7 @@ public class HeartGameApplication {
             logger.warn("Failed to set system look and feel, using default", e);
         }
 
-        // Launch application on Swing EDT
+        // Launch application
         SwingUtilities.invokeLater(() -> {
             try {
                 NavigationController navigationController = NavigationController.getInstance();
