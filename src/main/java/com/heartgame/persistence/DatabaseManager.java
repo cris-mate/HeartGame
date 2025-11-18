@@ -55,7 +55,13 @@ public final class DatabaseManager {
      */
     private Connection createConnection() {
         try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
+            String driverClass =  dbProperties.getProperty("db.driver");
+            if (driverClass == null || driverClass.trim().isEmpty()) {
+                logger.error("Database driver class (db.driver) not configured in properties.");
+                return null;
+            }
+            Class.forName(driverClass);
+
             Connection conn = DriverManager.getConnection(
                     dbProperties.getProperty("db.url"),
                     dbProperties.getProperty("db.username"),
@@ -64,7 +70,7 @@ public final class DatabaseManager {
             logger.info("Database connection established successfully");
             return conn;
         } catch (SQLException | ClassNotFoundException e) {
-            logger.error("Failed to connect to the database.", e);
+            logger.error("Failed to connect to the database. Check properties and server status.", e);
             return null;
         }
     }
