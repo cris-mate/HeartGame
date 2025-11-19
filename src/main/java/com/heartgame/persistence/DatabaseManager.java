@@ -82,7 +82,15 @@ public final class DatabaseManager {
      * This is called once during startup to ensure tables exist and data is loaded
      */
     private void initializeDatabase() {
-        logger.info("Starting database initialization...");
+        String dbUrl = dbProperties.getProperty("db.url", "");
+
+        // Checks if running in the H2 in-memory test environment
+        // The test database URL contains "jdbc:h2:mem"
+        if (dbUrl.contains("jdbc:h2:mem")) {
+            logger.warn("Skipping production initialization in H2 test environment.");
+            return;
+        }
+        logger.info("Starting production database initialization...");
 
         // 1. Ensure the database structure is created using schema.sql
         executeSQLScript("schema.sql");
