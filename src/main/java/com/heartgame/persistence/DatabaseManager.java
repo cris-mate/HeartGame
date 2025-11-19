@@ -92,13 +92,44 @@ public final class DatabaseManager {
         }
         logger.info("Starting production database initialization...");
 
-        // 1. Ensure the database structure is created using schema.sql
+        // Ensures the database structure is created using schema.sql
         executeSQLScript("schema.sql");
 
-        // 2. Load the backup data from heartgame_backup.sql
-        executeSQLScript("heartgame_backup.sql");
-
+        // Loads backup data ONLY if this is first-time setup (tables are empty)
+        // This prevents existing user data from being wiped on application restart
+        if (isDatabaseEmpty()) {
+            logger.info("Database is empty. Loading initial seed data from backup...");
+            executeSQLScript("heartgame_backup.sql");
+        } else {
+            logger.info("Database contains existing data. Skipping backup restoration to preserve user data.");
+        }
         logger.info("Database initialization complete.");
+    }
+
+    /**
+     * Checks if the database has any user data
+     * Used to determine if seed data should be loaded from backup
+     * @return true if the users table is empty or doesn't exist, false otherwise
+     */
+    private boolean isDatabaseEmpty() {
+        if (this.connection == null) {
+            logger.debug("Connection is null, considering database as empty");
+            return true;
+        }
+
+        try (java.sql.Statement stmt = connection.createStatement()) {
+            var rs = stmt.executeQuery("SELECT COUNT(*) FROM users");
+            if (rs.next()) {
+                int count = rs.getInt(1);
+                logger.debug("Found {} users in database", count);
+                return count == 0;
+            }
+            return true;
+        } catch (SQLException e) {
+            // If table doesn't exist yet, schema.sql will create it
+            logger.debug("Could not check user count (table may not exist yet): {}", e.getMessage());
+            return true;
+        }
     }
 
     /**

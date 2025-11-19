@@ -93,7 +93,6 @@ CREATE TABLE `users` (
   `username` varchar(50) NOT NULL,
   `password_hash` varchar(60) DEFAULT NULL,
   `email` varchar(100) DEFAULT NULL,
-  `display_name` varchar(100) DEFAULT NULL,
   `oauth_provider` varchar(20) DEFAULT NULL,
   `oauth_id` varchar(255) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
