@@ -28,6 +28,8 @@ public final class DatabaseManager {
     private DatabaseManager() {
         this.dbProperties = loadDatabaseProperties();
         this.connection = createConnection();
+
+        initializeDatabase();
     }
 
     /**
@@ -72,6 +74,75 @@ public final class DatabaseManager {
         } catch (SQLException | ClassNotFoundException e) {
             logger.error("Failed to connect to the database. Check properties and server status.", e);
             return null;
+        }
+    }
+
+    /**
+     * Initialises the database: sets up the schema and imports backup data if available
+     * This is called once during startup to ensure tables exist and data is loaded
+     */
+    private void initializeDatabase() {
+        logger.info("Starting database initialization...");
+
+        // 1. Ensure the database structure is created using schema.sql
+        executeSQLScript("schema.sql");
+
+        // 2. Load the backup data from heartgame_backup.sql
+        executeSQLScript("heartgame_backup.sql");
+
+        logger.info("Database initialization complete.");
+    }
+
+    /**
+     * Executes a SQL script file from the classpath
+     * This is a simple implementation that splits statements by semicolon.
+     * @param scriptPath The resource path
+     * @return true if successful, false otherwise
+     */
+    private boolean executeSQLScript(String scriptPath) {
+        if (this.connection == null) {
+            logger.error("Cannot execute script: database connection is null.");
+            return false;
+        }
+
+        try (InputStream input = getClass().getClassLoader().getResourceAsStream(scriptPath)) {
+            if (input == null) {
+                // The schema.sql is critical, but the backup file is optional
+                if (!scriptPath.equals("schema.sql")) {
+                    logger.debug("Optional SQL script not found: {}", scriptPath);
+                    return true;
+                }
+                logger.error("Critical SQL script not found: {}", scriptPath);
+                return false;
+            }
+
+            logger.info("Executing SQL script: {}", scriptPath);
+
+            // Read the entire file content
+            String script = new String(input.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+
+            // Split the script into individual SQL statements by semicolon
+            String[] statements = script.split(";");
+
+            try (java.sql.Statement stmt = connection.createStatement()) {
+                for (String statement : statements) {
+                    String trimmedStatement = statement.trim();
+                    // Skip empty lines, whitespace, and single-line comments
+                    if (trimmedStatement.isEmpty() || trimmedStatement.startsWith("--")) continue;
+
+                    stmt.execute(trimmedStatement);
+                }
+                logger.info("SQL script executed successfully: {}", scriptPath);
+                return true;
+            } catch (java.sql.SQLException e) {
+                // Log the failure but don't re-throw, allowing the application to attempt to start
+                logger.error("Failed to execute SQL script: {}", scriptPath, e);
+                return false;
+            }
+
+        } catch (IOException e) {
+            logger.error("Failed to read SQL script file: {}", scriptPath, e);
+            return false;
         }
     }
 
