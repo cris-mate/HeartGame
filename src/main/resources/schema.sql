@@ -65,3 +65,5 @@ CREATE TABLE IF NOT EXISTS logging_event_property (
   PRIMARY KEY(event_id, mapped_key),
   FOREIGN KEY (event_id) REFERENCES logging_event(event_id) ON DELETE CASCADE
   );
+
+ALTER TABLE users DROP COLUMN display_name;
