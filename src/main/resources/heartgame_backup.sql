@@ -32,7 +32,7 @@ CREATE TABLE `game_sessions` (
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`),
   CONSTRAINT `game_sessions_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=269 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=346 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -41,7 +41,7 @@ CREATE TABLE `game_sessions` (
 
 LOCK TABLES `game_sessions` WRITE;
 /*!40000 ALTER TABLE `game_sessions` DISABLE KEYS */;
-INSERT INTO `game_sessions` VALUES (264,436,'2025-11-18 22:43:51','2025-11-18 22:44:54',18,23),(265,437,'2025-11-18 22:46:07','2025-11-18 22:47:09',16,20),(266,438,'2025-11-18 22:50:02','2025-11-18 22:51:04',25,29),(267,437,'2025-11-18 23:27:40','2025-11-18 23:28:42',16,17),(268,439,'2025-11-18 23:55:49','2025-11-18 23:56:52',24,24);
+INSERT INTO `game_sessions` VALUES (339,549,'2025-11-19 17:46:30','2025-11-19 17:47:32',21,22),(340,550,'2025-11-19 18:05:52','2025-11-19 18:06:54',16,17),(341,551,'2025-11-19 18:08:24','2025-11-19 18:10:35',17,23),(342,552,'2025-11-19 18:11:27','2025-11-19 18:12:40',19,19),(343,553,'2025-11-20 12:26:18','2025-11-20 12:27:40',12,13),(344,554,'2025-11-20 12:28:40','2025-11-20 12:29:42',19,19),(345,555,'2025-11-20 12:31:08','2025-11-20 12:32:11',24,24);
 /*!40000 ALTER TABLE `game_sessions` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -93,6 +93,7 @@ CREATE TABLE `users` (
   `username` varchar(50) NOT NULL,
   `password_hash` varchar(60) DEFAULT NULL,
   `email` varchar(100) DEFAULT NULL,
+  `display_name` varchar(100) DEFAULT NULL,
   `oauth_provider` varchar(20) DEFAULT NULL,
   `oauth_id` varchar(255) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
@@ -101,7 +102,7 @@ CREATE TABLE `users` (
   UNIQUE KEY `username` (`username`),
   KEY `idx_username` (`username`),
   KEY `idx_oauth` (`oauth_provider`,`oauth_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=440 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=556 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -110,7 +111,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (434,'player1','$2a$10$UV05KpdtNid9Nc9vNdxUEu4g23PvE0frer.UtAwvdY1.q/cibzfdi',NULL,NULL,'password',NULL,'2025-11-14 11:44:03',NULL),(436,'cristidragosmatei',NULL,'cristidragosmatei@gmail.com',NULL,'google','107492280530087989909','2025-11-14 11:44:43','2025-11-18 22:36:35'),(437,'admin','$2a$10$3OAr//6Ny4XJ8kDMUxVNR.rdU6L3HvpZFg0I0u/bkd0ZK7n4MFere','admin@heartgame.com',NULL,'password',NULL,'2025-11-18 22:45:54','2025-11-18 23:27:38'),(438,'martin','$2a$10$d7i4jPDCJIcqxYZrBDun3OuJQjCD8JtsRth965lA4R.riK.xhq84C','martin@heartgame.com',NULL,'password',NULL,'2025-11-18 22:49:48','2025-11-18 22:50:00'),(439,'serena','$2a$10$ogHf02vmPaiyrRUVz0mmfeNUFcvb6gG5t8KC7heMjuN9SbR1tMe8e','serena@heartgame.com',NULL,'password',NULL,'2025-11-18 23:55:37','2025-11-18 23:55:47');
+INSERT INTO `users` VALUES (549,'cristidragosmatei',NULL,'cristidragosmatei@gmail.com',NULL,'google','107492280530087989909','2025-11-19 17:11:35','2025-11-19 17:46:20'),(550,'admin','$2a$10$2N3FTP3QvB.eXWvyoChhc.748pg8ZLHDbCh7bx5DaoZC9KiLta5.G','admin@heartgame.com',NULL,'password',NULL,'2025-11-19 18:05:36','2025-11-20 12:24:23'),(551,'martin','$2a$10$CuZd1q.5xmsVbkRHUF6Tqe9eADAedl6SaSiU3UIzB0YLk.Jv45th6','martin@heartgame.com',NULL,'password',NULL,'2025-11-19 18:08:08','2025-11-19 18:08:18'),(552,'serena','$2a$10$SGJ9hf0MFotziIYM4PNX7e0RcQsDWmb4Z5bngFedm7g65G/9aOWoO','serena@heartgame.com',NULL,'password',NULL,'2025-11-19 18:11:12','2025-11-19 18:11:21'),(553,'theo','$2a$10$fldIQbI/EigW3agUg05vj.MVjoqqrsozqQ0ffRfIdrfs5rr9KM7LO','theo@heartgame.com',NULL,'password',NULL,'2025-11-20 12:26:01','2025-11-20 12:26:17'),(554,'cassandra','$2a$10$XdWlT0tT2Az77K.jCRJcwOoXN0t.qqiZTBXqbDU.KMqCL13AQP456','cassandra@heartgame.com',NULL,'password',NULL,'2025-11-20 12:28:29','2025-11-20 12:28:38'),(555,'richard','$2a$10$6r/VTa0.y5LroG65bRxyce2WBSJ03nPYnklgFI3KvMpwxuxol3TQq','richard@heartgame.com',NULL,'password',NULL,'2025-11-20 12:30:57','2025-11-20 12:31:06');
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -123,4 +124,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-11-19  0:04:29
+-- Dump completed on 2025-11-20 12:33:27
